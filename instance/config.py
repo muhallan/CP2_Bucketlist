@@ -9,7 +9,7 @@ class Config(object):
     SECRET = 'theboythatwentaway'
     # SECRET_KEY = 'theboythatwentaway'
     # SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    SQLALCHEMY_DATABASE_URI = "postgresql://localhost/flask_api"
+    SQLALCHEMY_DATABASE_URI = "postgresql://localhost/bucketlist_api"
 
 
 class DevelopmentConfig(Config):
@@ -18,7 +18,7 @@ class DevelopmentConfig(Config):
 
 
 class TestingConfig(Config):
-    """Configurations for Testing, with a separate test database."""
+    """Configurations for Testing, it has its own database."""
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'postgresql://localhost/test_db'
     DEBUG = True
