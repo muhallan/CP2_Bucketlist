@@ -5,11 +5,11 @@ from app import create_app, db
 
 
 class BucketlistTestCase(unittest.TestCase):
-    """This class represents the bucketlist tests case"""
+    """This class represents the bucketlist test case"""
 
     def setUp(self):
         """
-        Initialize the app and its tests client and our tests database
+        Initialize the app and its test client and our test database
         :return:
         """
         self.app = create_app(config_name="testing")
@@ -20,6 +20,19 @@ class BucketlistTestCase(unittest.TestCase):
         with self.app.app_context():
             # create all tables
             db.create_all()
+
+    def register_user(self, email="user@test.com", password="test1234"):
+        """
+        Helper method to help register a test user
+        :param email:
+        :param password:
+        :return:
+        """
+        user_data = {
+            'email': email,
+            'password': password
+        }
+        return self.client().post('/auth/register', data=user_data)
 
     def test_bucketlist_creation(self):
         """
