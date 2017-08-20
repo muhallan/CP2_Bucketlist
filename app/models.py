@@ -44,3 +44,10 @@ class Bucketlist(db.Model):
         """
         db.session.delete(self)
         db.session.commit()
+
+    def __repr__(self):
+        """
+        Represents the object instance of the model
+        :return: the bucketlist description
+        """
+        return "<Bucketlist: {}>".format(self.name)
