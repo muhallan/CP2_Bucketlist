@@ -33,19 +33,21 @@ class User(db.Model):
         """
         db.session.add(self)
         db.session.commit()
-        
+
 
 class Bucketlist(db.Model):
     """This is the bucketlist table where all bucketlists are saved."""
 
     __tablename__ = 'bucketlists'
 
+    # columns of the table
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
+    created_by = db.Column(db.Integer, db.ForeignKey(User.id))
 
     def __init__(self, name):
         """
