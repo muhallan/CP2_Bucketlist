@@ -14,7 +14,7 @@ class BucketlistTestCase(unittest.TestCase):
         """
         self.app = create_app(config_name="testing")
         self.client = self.app.test_client
-        self.bucketlist = {'name': 'Go to the Grand canyon for camping'}
+        self.bucketlist = {'name': 'Go to Grand canyon for camping'}
 
         # binds the app to the current context
         with self.app.app_context():
@@ -54,3 +54,20 @@ class BucketlistTestCase(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         self.assertIn('Go to Grand canyon', str(result.data))
 
+    def test_bucketlist_can_be_edited(self):
+        """
+        Test if a bucketlist can be retrieved, edited and saved
+        :return:
+        """
+        res = self.client().post(
+            '/bucketlists/',
+            data={'name': 'Visit the Grand canyon'})
+        self.assertEqual(res.status_code, 201)
+        res = self.client().put(
+            '/bucketlists/1',
+            data={
+                "name": "Must visit the Grand Canyon!"
+            })
+        self.assertEqual(res.status_code, 200)
+        results = self.client().get('/bucketlists/1')
+        self.assertIn('Must visit the', str(results.data))
