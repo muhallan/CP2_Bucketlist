@@ -178,6 +178,5 @@ class BucketlistTestCase(unittest.TestCase):
             headers=dict(Authorization="Bearer " + access_token))
         self.assertEqual(result.status_code, 404)
 
-
     if __name__ == "__main__":
         unittest.main()
