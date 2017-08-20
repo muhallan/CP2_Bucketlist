@@ -7,7 +7,10 @@ class AuthTestCase(unittest.TestCase):
     """Test case for the authentication blueprint."""
 
     def setUp(self):
-        """Set up test variables."""
+        """
+        Initialize and set up the test case
+        :return:
+        """
         self.app = create_app(config_name="testing")
         # initialize the test client
         self.client = self.app.test_client
@@ -22,3 +25,15 @@ class AuthTestCase(unittest.TestCase):
             db.session.close()
             db.drop_all()
             db.create_all()
+
+    def test_registration(self):
+        """
+        Method to test if user registration works correctly
+        :return:
+        """
+        res = self.client().post('/auth/register', data=self.user_data)
+        # get the results returned in json format
+        result = json.loads(res.data.decode())
+        # assert that the request contains a success message and a 201 status code
+        self.assertEqual(result['message'], "You registered successfully.")
+        self.assertEqual(res.status_code, 201)
