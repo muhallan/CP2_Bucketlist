@@ -52,7 +52,15 @@ class BucketlistTestCase(unittest.TestCase):
         Test if a bucketlist is actually created using a resulting status code
         :return:
         """
-        res = self.client().post('/bucketlists/', data=self.bucketlist)
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        # create a bucketlist by making a POST request
+        res = self.client().post(
+            '/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.bucketlist)
         self.assertEqual(res.status_code, 201)
         self.assertIn('Go to Grand canyon', str(res.data))
 
