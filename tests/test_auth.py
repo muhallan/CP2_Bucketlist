@@ -35,7 +35,7 @@ class AuthTestCase(unittest.TestCase):
         # get the results returned in json format
         result = json.loads(res.data.decode())
         # assert that the request contains a success message and a 201 status code
-        self.assertEqual(result['message'], "You registered successfully.")
+        self.assertEqual(result['message'], "You registered successfully. Please log in.")
         self.assertEqual(res.status_code, 201)
 
     def test_already_registered_user(self):
@@ -68,3 +68,24 @@ class AuthTestCase(unittest.TestCase):
         # Assert that the status code is equal to 200
         self.assertEqual(login_res.status_code, 200)
         self.assertTrue(result['access_token'])
+
+    def test_non_registered_user_login(self):
+        """
+        Test if a user who is not registered cannot login
+        :return:
+        """
+        # define a dictionary to represent an unregistered user
+        not_a_user = {
+            'email': 'not_a_user@example.com',
+            'password': 'nope'
+        }
+        # send a POST request to /auth/login with the data above
+        res = self.client().post('/auth/login', data=not_a_user)
+        # get the result in json
+        result = json.loads(res.data.decode())
+
+        # assert that this response must contain an error message
+        # and an error status code 401(Unauthorized)
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(
+            result['message'], "Invalid email or password, Please try again")
