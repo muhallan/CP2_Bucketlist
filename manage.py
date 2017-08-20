@@ -18,12 +18,12 @@ manager = Manager(app)
 # Usage: python manage.py db init
 manager.add_command('db', MigrateCommand)
 
-# define our command for testing called "test"
-# Usage: python manage.py test
+# define our command for testing called "tests"
+# Usage: python manage.py tests
 @manager.command
 def test():
-    """Runs the unit tests without test coverage."""
-    tests = unittest.TestLoader().discover('./tests', pattern='test*.py')
+    """Runs the unit tests without tests coverage."""
+    tests = unittest.TestLoader().discover('./tests', pattern='tests*.py')
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
         return 0
