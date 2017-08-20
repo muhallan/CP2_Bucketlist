@@ -1,5 +1,21 @@
 from app import db
+from flask_bcrypt import Bcrypt
 
+
+class User(db.Model):
+    """
+    This is the users table where users who sign up with our app are stored
+    """
+
+    __tablename__ = 'users'
+
+    # Define the columns of the users table, starting with the primary key
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(256), nullable=False, unique=True)
+    password = db.Column(db.String(256), nullable=False)
+    bucketlists = db.relationship(
+        'Bucketlist', order_by='Bucketlist.id', cascade="all, delete-orphan")
+    
 
 class Bucketlist(db.Model):
     """This is the bucketlist table where all bucketlists are saved."""
