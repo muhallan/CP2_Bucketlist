@@ -34,6 +34,19 @@ class BucketlistTestCase(unittest.TestCase):
         }
         return self.client().post('/auth/register', data=user_data)
 
+    def login_user(self, email="user@test.com", password="test1234"):
+        """
+        Helper method to help login a test user
+        :param email:
+        :param password:
+        :return:
+        """
+        user_data = {
+            'email': email,
+            'password': password
+        }
+        return self.client().post('/auth/login', data=user_data)
+
     def test_bucketlist_creation(self):
         """
         Test if a bucketlist is actually created using a resulting status code
