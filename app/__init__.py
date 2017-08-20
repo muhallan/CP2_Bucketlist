@@ -8,6 +8,11 @@ db = SQLAlchemy()
 
 
 def create_app(config_name):
+    """
+    Method used to create an app and initialize it with the required configurations
+    :param config_name:
+    :return: app
+    """
     from app.models import Bucketlist
 
     app = FlaskAPI(__name__, instance_relative_config=True)
@@ -18,6 +23,10 @@ def create_app(config_name):
 
     @app.route('/bucketlists/', methods=['POST', 'GET'])
     def bucketlists():
+        """
+        Method to add a bucketlist or retrieve all bucketlists
+        :return: response
+        """
         if request.method == "POST":
             name = str(request.data.get('name', ''))
             if name:
@@ -50,6 +59,12 @@ def create_app(config_name):
 
     @app.route('/bucketlists/<int:id>', methods=['GET', 'PUT', 'DELETE'])
     def bucketlist_manipulation(id, **kwargs):
+        """
+        Method to retrive a bucketlis of a given id and then manipulate it accordingly
+        :param id:
+        :param kwargs:
+        :return: response
+        """
         # retrieve a buckelist using it's ID
         bucketlist = Bucketlist.query.filter_by(id=id).first()
         if not bucketlist:
