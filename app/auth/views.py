@@ -7,3 +7,43 @@ from app.models import User
 
 class RegistrationView(MethodView):
     """This class registers a new user."""
+
+    def post(self):
+        """
+        Handle POST request for this view. This registers a new user
+        Url is at /auth/register
+        :return:
+        """
+
+        # check to see if the user already exists
+        user = User.query.filter_by(email=request.data['email']).first()
+
+        if not user:
+            # There is no user so we'll try to register them
+            try:
+                post_data = request.data
+                # Register the user
+                email = post_data['email']
+                password = post_data['password']
+                user = User(email=email, password=password)
+                user.save()
+
+                response = {
+                    'message': 'You registered successfully. Please log in.'
+                }
+                # return a response notifying the user that they registered successfully
+                return make_response(jsonify(response)), 201
+            except Exception as e:
+                # An error occured, therefore return a string message containing the error
+                response = {
+                    'message': str(e)
+                }
+                return make_response(jsonify(response)), 401
+        else:
+            # There is an existing user.
+            # Return a message to the user telling them that they they already exist
+            response = {
+                'message': 'User already exists. Please login.'
+            }
+
+            return make_response(jsonify(response)), 202
