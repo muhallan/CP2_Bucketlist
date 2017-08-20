@@ -60,6 +60,23 @@ class User(db.Model):
             # return an error in string format if an exception occurs
             return str(e)
 
+    @staticmethod
+    def decode_token(token):
+        """Decodes the access token from the Authorization header."""
+
+        from run import app
+
+        try:
+            # try to decode the token using our SECRET variable
+            payload = jwt.decode(token, app.config.get('SECRET'))
+            return payload['sub']
+        except jwt.ExpiredSignatureError:
+            # the token is expired, return an error string
+            return "Expired token. Please login to get a new token"
+        except jwt.InvalidTokenError:
+            # the token is invalid, return an error string
+            return "Invalid token. Please register or login"
+
 
 class Bucketlist(db.Model):
     """This is the bucketlist table where all bucketlists are saved."""
