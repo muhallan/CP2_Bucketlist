@@ -96,3 +96,6 @@ class BucketlistTestCase(unittest.TestCase):
             # drop all tables
             db.session.remove()
             db.drop_all()
+
+    if __name__ == "__main__":
+        unittest.main()
