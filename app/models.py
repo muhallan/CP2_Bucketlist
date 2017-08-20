@@ -49,12 +49,13 @@ class Bucketlist(db.Model):
         onupdate=db.func.current_timestamp())
     created_by = db.Column(db.Integer, db.ForeignKey(User.id))
 
-    def __init__(self, name):
+    def __init__(self, name, created_by):
         """
-        Init method to initialize a bucketlist
+        Init method to initialize a bucketlist with its name and the one who created it
         :param name:
         """
         self.name = name
+        self.created_by = created_by
 
     def save(self):
         """
@@ -65,13 +66,13 @@ class Bucketlist(db.Model):
         db.session.commit()
 
     @staticmethod
-    def get_all(self):
+    def get_all(user_id):
         """
-        To get all the bucketlists that are saved
+        To get all the bucketlists for a specified user
         :param self:
         :return:
         """
-        return Bucketlist.query.all()
+        return Bucketlist.query.filter_by(created_by=user_id)
 
     def delete(self):
         """
