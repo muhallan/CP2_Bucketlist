@@ -29,3 +29,14 @@ class BucketlistTestCase(unittest.TestCase):
         res = self.client().post('/bucketlists/', data=self.bucketlist)
         self.assertEqual(res.status_code, 201)
         self.assertIn('Go to Grand canyon', str(res.data))
+
+    def test_api_can_get_all_bucketlists(self):
+        """
+        Test if all the bucketlists can be retrieved
+        :return:
+        """
+        res = self.client().post('/bucketlists/', data=self.bucketlist)
+        self.assertEqual(res.status_code, 201)
+        res = self.client().get('/bucketlists/')
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Go to Grand canyon', str(res.data))
