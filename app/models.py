@@ -15,7 +15,12 @@ class User(db.Model):
     password = db.Column(db.String(256), nullable=False)
     bucketlists = db.relationship(
         'Bucketlist', order_by='Bucketlist.id', cascade="all, delete-orphan")
-    
+
+    def __init__(self, email, password):
+        """Initialize the user with an email and a password."""
+        self.email = email
+        self.password = Bcrypt().generate_password_hash(password).decode()
+
 
 class Bucketlist(db.Model):
     """This is the bucketlist table where all bucketlists are saved."""
