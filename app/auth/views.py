@@ -48,6 +48,11 @@ class RegistrationView(MethodView):
 
             return make_response(jsonify(response)), 202
 
+
+class LoginView(MethodView):
+    """This class-based view handles user login and access token generation."""
+
+
 registration_view = RegistrationView.as_view('register_view')
 # Define the rule for the registration url  /auth/register
 # Then add the rule to the blueprint
