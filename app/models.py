@@ -27,6 +27,13 @@ class User(db.Model):
         """
         return Bcrypt().check_password_hash(self.password, password)
 
+    def save(self):
+        """Save a user to the database.
+        This includes creating a new user and editing one.
+        """
+        db.session.add(self)
+        db.session.commit()
+        
 
 class Bucketlist(db.Model):
     """This is the bucketlist table where all bucketlists are saved."""
