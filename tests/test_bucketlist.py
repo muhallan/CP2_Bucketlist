@@ -19,6 +19,8 @@ class BucketlistTestCase(unittest.TestCase):
         # binds the app to the current context
         with self.app.app_context():
             # create all tables
+            db.session.close()
+            db.drop_all()
             db.create_all()
 
     def register_user(self, email="user@test.com", password="test1234"):
@@ -146,31 +148,36 @@ class BucketlistTestCase(unittest.TestCase):
             '/bucketlists/{}'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token))
         self.assertIn('Must visit the', str(results.data))
-        
+
     def test_bucketlist_deletion(self):
         """
         Test if a bucketlist can be deleted
         :return:
         """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
         res = self.client().post(
             '/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
             data={'name': 'Visit the Grand Canyon!'})
         self.assertEqual(res.status_code, 201)
-        res = self.client().delete('/bucketlists/1')
+        # get the bucketlist in json
+        results = json.loads(res.data.decode())
+
+        # delete the bucketlist we just created
+        res = self.client().delete(
+            '/bucketlists/{}'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token), )
         self.assertEqual(res.status_code, 200)
+
         # Test to see if it exists, should return a 404
-        result = self.client().get('/bucketlists/1')
+        result = self.client().get(
+            '/bucketlists/1',
+            headers=dict(Authorization="Bearer " + access_token))
         self.assertEqual(result.status_code, 404)
 
-    def tearDown(self):
-        """
-        Remove all the initialized variables
-        :return:
-        """
-        with self.app.app_context():
-            # drop all tables
-            db.session.remove()
-            db.drop_all()
 
     if __name__ == "__main__":
         unittest.main()
