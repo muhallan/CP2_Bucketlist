@@ -1,9 +1,10 @@
 from app import db
 
+
 class Bucketlist(db.Model):
     """This is the bucketlist table where all bucketlists are saved."""
 
-    __tablename__ = 'bucketlist'
+    __tablename__ = 'bucketlists'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
@@ -19,3 +20,7 @@ class Bucketlist(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    @staticmethod
+    def get_all(self):
+        return Bucketlist.query.all()
