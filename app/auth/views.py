@@ -52,6 +52,41 @@ class RegistrationView(MethodView):
 class LoginView(MethodView):
     """This class-based view handles user login and access token generation."""
 
+    def post(self):
+        """
+        Handle POST request for this view. This view logins in a user
+        Url is /auth/login
+        :return:
+        """
+        try:
+            # Get the user object using their email because it is unique
+            user = User.query.filter_by(email=request.data['email']).first()
+
+            # Try to authenticate the found user using their password
+            if user and user.password_is_valid(request.data['password']):
+                # Generate the access token. This will be used as the authorization header
+                access_token = user.generate_token(user.id)
+                if access_token:
+                    response = {
+                        'message': 'You logged in successfully.',
+                        'access_token': access_token.decode()
+                    }
+                    return make_response(jsonify(response)), 200
+            else:
+                # User does not exist. Therefore, we return an error message
+                response = {
+                    'message': 'Invalid email or password, Please try again'
+                }
+                return make_response(jsonify(response)), 401
+
+        except Exception as e:
+            # Create a response containing an string error message
+            response = {
+                'message': str(e)
+            }
+            # Return a server error using the HTTP Error Code 500 (Internal Server Error)
+            return make_response(jsonify(response)), 500
+
 
 registration_view = RegistrationView.as_view('register_view')
 # Define the rule for the registration url  /auth/register
