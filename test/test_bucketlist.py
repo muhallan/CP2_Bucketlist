@@ -20,3 +20,12 @@ class BucketlistTestCase(unittest.TestCase):
         with self.app.app_context():
             # create all tables
             db.create_all()
+
+    def test_bucketlist_creation(self):
+        """
+        Test if a bucketlist is actually created using a resulting status code
+        :return:
+        """
+        res = self.client().post('/bucketlists/', data=self.bucketlist)
+        self.assertEqual(res.status_code, 201)
+        self.assertIn('Go to Grand canyon', str(res.data))
