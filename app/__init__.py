@@ -79,7 +79,7 @@ def create_app(config_name):
     @app.route('/bucketlists/<int:id>', methods=['GET', 'PUT', 'DELETE'])
     def bucketlist_manipulation(id, **kwargs):
         """
-        Method to retrive a bucketlis of a given id and then manipulate it accordingly
+        Method to retrieve a bucketlist of a given id and then manipulate it accordingly
         :param id:
         :param kwargs:
         :return: response
