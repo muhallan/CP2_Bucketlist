@@ -71,3 +71,18 @@ class BucketlistTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         results = self.client().get('/bucketlists/1')
         self.assertIn('Must visit the', str(results.data))
+
+    def test_bucketlist_deletion(self):
+        """
+        Test if a bucketlist can be deleted
+        :return:
+        """
+        res = self.client().post(
+            '/bucketlists/',
+            data={'name': 'Visit the Grand Canyon!'})
+        self.assertEqual(res.status_code, 201)
+        res = self.client().delete('/bucketlists/1')
+        self.assertEqual(res.status_code, 200)
+        # Test to see if it exists, should return a 404
+        result = self.client().get('/bucketlists/1')
+        self.assertEqual(result.status_code, 404)
