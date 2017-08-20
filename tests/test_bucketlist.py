@@ -93,11 +93,24 @@ class BucketlistTestCase(unittest.TestCase):
         Test if a single bucketlist can be retrieved by its id
         :return:
         """
-        res = self.client().post('/bucketlists/', data=self.bucketlist)
-        self.assertEqual(res.status_code, 201)
-        result_in_json = json.loads(res.data.decode('utf-8').replace("'", "\""))
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        rv = self.client().post(
+            '/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.bucketlist)
+
+        # assert that the bucketlist is created
+        self.assertEqual(rv.status_code, 201)
+        # get the response data in json format
+        results = json.loads(rv.data.decode())
+
         result = self.client().get(
-            '/bucketlists/{}'.format(result_in_json['id']))
+            '/bucketlists/{}'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token))
+        # assert that the bucketlist is actually returned given its ID
         self.assertEqual(result.status_code, 200)
         self.assertIn('Go to Grand canyon', str(result.data))
 
