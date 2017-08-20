@@ -47,3 +47,11 @@ class RegistrationView(MethodView):
             }
 
             return make_response(jsonify(response)), 202
+
+registration_view = RegistrationView.as_view('register_view')
+# Define the rule for the registration url  /auth/register
+# Then add the rule to the blueprint
+auth_blueprint.add_url_rule(
+    '/auth/register',
+    view_func=registration_view,
+    methods=['POST'])
