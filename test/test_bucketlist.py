@@ -86,3 +86,13 @@ class BucketlistTestCase(unittest.TestCase):
         # Test to see if it exists, should return a 404
         result = self.client().get('/bucketlists/1')
         self.assertEqual(result.status_code, 404)
+
+    def tearDown(self):
+        """
+        Remove all the initialized variables
+        :return:
+        """
+        with self.app.app_context():
+            # drop all tables
+            db.session.remove()
+            db.drop_all()
