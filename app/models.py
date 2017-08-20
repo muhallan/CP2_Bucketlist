@@ -51,13 +51,14 @@ class User(db.Model):
             # create the byte string token using the payload and the SECRET key
             jwt_string = jwt.encode(
                 payload,
-                app.config.get('SECRET'),
+                app.config['SECRET'],
                 algorithm='HS256'
             )
             return jwt_string
 
         except Exception as e:
             # return an error in string format if an exception occurs
+            print(str(e))
             return str(e)
 
     @staticmethod
@@ -67,8 +68,8 @@ class User(db.Model):
         from run import app
 
         try:
-            # try to decode the token using our SECRET variable
-            payload = jwt.decode(token, app.config.get('SECRET'))
+            # decode the token using the SECRET variable
+            payload = jwt.decode(token, app.config['SECRET'])
             return payload['sub']
         except jwt.ExpiredSignatureError:
             # the token is expired, return an error string
@@ -79,7 +80,9 @@ class User(db.Model):
 
 
 class Bucketlist(db.Model):
-    """This is the bucketlist table where all bucketlists are saved."""
+    """
+    This is the bucketlist table where all bucketlists are saved.
+    """
 
     __tablename__ = 'bucketlists'
 
