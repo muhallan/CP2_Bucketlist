@@ -5,11 +5,11 @@ from app import create_app, db
 
 
 class BucketlistTestCase(unittest.TestCase):
-    """This class represents the bucketlist test case"""
+    """This class represents the bucketlist tests case"""
 
     def setUp(self):
         """
-        Initialize the app and its test client and our test database
+        Initialize the app and its tests client and our tests database
         :return:
         """
         self.app = create_app(config_name="testing")
