@@ -21,6 +21,12 @@ class User(db.Model):
         self.email = email
         self.password = Bcrypt().generate_password_hash(password).decode()
 
+    def password_is_valid(self, password):
+        """
+        Checks the password against it's hash to validates the user's password
+        """
+        return Bcrypt().check_password_hash(self.password, password)
+
 
 class Bucketlist(db.Model):
     """This is the bucketlist table where all bucketlists are saved."""
