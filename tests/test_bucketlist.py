@@ -203,5 +203,48 @@ class BucketlistTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 201)
         self.assertIn('Eat fried', str(res.data))
 
+    def test_update_bucketlist_item(self):
+        """Test if a bucketlist item can be edited (PUT Request)"""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        # create a bucketlist by making a POST request
+        res = self.client().post(
+            '/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.bucketlist)
+        self.assertEqual(res.status_code, 201)
+        # get the json with the bucketlist
+        results = json.loads(res.data.decode())
+
+        # create a bucketlist item by making a POST request and add it to the created bucketlist
+        res = self.client().post(
+            '/bucketlists/{}/items/'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token),
+            data={
+                "name": "Eat fried crabs"
+            })
+        self.assertEqual(res.status_code, 201)
+        # get the json containing the created bucketlist item
+        res_item = json.loads(res.data.decode())
+
+        # then, we edit the created bucketlist by making a PUT request
+        rv = self.client().put(
+            '/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
+            headers=dict(Authorization="Bearer " + access_token),
+            data={
+                "name": "Eat fried crabs mixed with honey"
+            })
+        self.assertEqual(rv.status_code, 200)
+
+        # finally, we get the edited bucketlist to see if it is actually edited.
+        # TODO requires implementing a GET for this too
+        results = self.client().get(
+            '/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
+            headers=dict(Authorization="Bearer " + access_token))
+        self.assertIn('mixed with honey', str(results.data))
+
+
     if __name__ == "__main__":
         unittest.main()
