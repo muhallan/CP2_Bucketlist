@@ -1,5 +1,6 @@
 from flask_api import FlaskAPI
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_
 # local import
 from instance.config import app_config
 from flask import request, jsonify, abort, make_response
@@ -23,7 +24,7 @@ def create_app(config_name):
     db.init_app(app)
 
     @app.route('/bucketlists/', methods=['POST', 'GET'])
-    @app.route('/bucketlists', methods=['POST', 'GET']) # for query parameter for pagination
+    @app.route('/bucketlists', methods=['POST', 'GET'])  # for query parameter for pagination and searching
     def bucketlists():
         """
         Method to add a bucketlist or retrieve all bucketlists
@@ -71,8 +72,17 @@ def create_app(config_name):
                     # set the default page to display to 1
                     page = 1
 
-                    # GET all the bucketlists created by this user
-                    bucketlists = Bucketlist.query.filter_by(created_by=user_id).paginate(page, limit)
+                    # get the query string for q - this is searching based on name
+                    search_string = request.args.get('q')
+
+                    # check if a search parameter was provided
+                    if search_string:
+                        # get bucketlists whose name contains the search string
+                        bucketlists = Bucketlist.query.filter_by(created_by=user_id).filter(Bucketlist.name.like('%' + search_string + '%')).paginate(page, limit)
+                    else:
+                        # GET all the bucketlists created by this user
+                        bucketlists = Bucketlist.query.filter_by(created_by=user_id).paginate(page, limit)
+
                     results = []
 
                     for bucketlist in bucketlists.items:
