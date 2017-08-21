@@ -134,3 +134,8 @@ class Bucketlist(db.Model):
         :return: the bucketlist description
         """
         return "<Bucketlist: {}>".format(self.name)
+
+class BucketlistItem(db.Model):
+    """This class defines the bucketlist_items table"""
+
+    __tablename__ = "bucketlist_items"
