@@ -178,5 +178,30 @@ class BucketlistTestCase(unittest.TestCase):
             headers=dict(Authorization="Bearer " + access_token))
         self.assertEqual(result.status_code, 404)
 
+    def test_create_new_bucketlist_item(self):
+        """Test if a new item can be added to an existing bucketlist"""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        # create a bucketlist by making a POST request
+        res = self.client().post(
+            '/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.bucketlist)
+        self.assertEqual(res.status_code, 201)
+        # get the json with the bucketlist
+        results = json.loads(res.data.decode())
+
+        # create a bucketlist item by making a POST request and add it to the created bucketlist
+        res = self.client().post(
+            '/bucketlists/{}/items/'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token),
+            data={
+                "name": "Eat fried crabs"
+            })
+        self.assertEqual(res.status_code, 201)
+        self.assertIn('Eat fried', str(res.data))
+
     if __name__ == "__main__":
         unittest.main()
