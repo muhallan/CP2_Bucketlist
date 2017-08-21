@@ -139,3 +139,13 @@ class BucketlistItem(db.Model):
     """This class defines the bucketlist_items table"""
 
     __tablename__ = "bucketlist_items"
+
+    # define the columns of the table, starting with its primary key
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_modified = db.Column(
+        db.DateTime, default=db.func.current_timestamp(),
+        onupdate=db.func.current_timestamp())
+    done = db.Column(db.Boolean, default=False)
+    belongs_to = db.Column(db.Integer, db.ForeignKey(Bucketlist.id))
