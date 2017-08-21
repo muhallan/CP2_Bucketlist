@@ -149,3 +149,30 @@ class BucketlistItem(db.Model):
         onupdate=db.func.current_timestamp())
     done = db.Column(db.Boolean, default=False)
     belongs_to = db.Column(db.Integer, db.ForeignKey(Bucketlist.id))
+
+    def __init__(self, name, belongs_to):
+        """Initialize the bucketlist item with a name and the bucketlist it belongs to."""
+        self.name = name
+        self.belongs_to = belongs_to
+
+    def save(self):
+        """Save a bucketlist item
+        This applies for both creating a new bucketlist item
+        and updating an existing one onupdate
+        """
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_bucketlist_items(bucketlist_id):
+        """This method gets all the items in a given bucketlist."""
+        return BucketlistItem.query.filter_by(belongs_to=bucketlist_id)
+
+    def delete(self):
+        """Deletes a given bucketlist item."""
+        db.session.delete(self)
+        db.session.commit()
+
+    def __repr__(self):
+        """Return a representation of a bucketlist instance."""
+        return "<Bucketlist Item: {}>".format(self.name)
