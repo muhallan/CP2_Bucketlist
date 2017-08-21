@@ -245,6 +245,44 @@ class BucketlistTestCase(unittest.TestCase):
             headers=dict(Authorization="Bearer " + access_token))
         self.assertIn('mixed with honey', str(results.data))
 
+    def test_delete_bucketlist_item(self):
+        """Test if an item in a bucketlist can be deleted"""
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        # create a bucketlist by making a POST request
+        res = self.client().post(
+            '/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.bucketlist)
+        self.assertEqual(res.status_code, 201)
+        # get the json with the bucketlist
+        results = json.loads(res.data.decode())
+
+        # create a bucketlist item by making a POST request and add it to the created bucketlist
+        res = self.client().post(
+            '/bucketlists/{}/items/'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token),
+            data={
+                "name": "Eat fried crabs"
+            })
+        self.assertEqual(res.status_code, 201)
+        # get the json containing the created bucketlist item
+        res_item = json.loads(res.data.decode())
+
+        # delete the bucketlist item we just created
+        res = self.client().delete(
+            '/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
+            headers=dict(Authorization="Bearer " + access_token), )
+        self.assertEqual(res.status_code, 200)
+
+        # Test to see if it exists, should return a 404
+        # TODO requires implementing a GET for this too
+        result = self.client().get(
+            '/bucketlists/{}/items/1'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token))
+        self.assertEqual(result.status_code, 404)
 
     if __name__ == "__main__":
         unittest.main()
