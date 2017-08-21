@@ -189,6 +189,79 @@ def create_app(config_name):
                 }
                 return make_response(jsonify(response)), 401
 
+    @app.route('/bucketlists/<int:id>/items/<int:item_id>', methods=['GET', 'PUT', 'DELETE'])
+    def bucketlist_items_manipulation(id, item_id):
+        """
+        Method to retrieve an item with <id>:item_id from a bucketlist with <id>:id and manipulate it according to the request passed
+        :param id:
+        :param item_id:
+        :return:
+        """
+        # Get the access token from the header
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            # Attempt to decode the token and get the User ID
+            user_id = User.decode_token(access_token)
+            if not isinstance(user_id, str):
+                # Go ahead and handle the request, the user is authenticated
+
+                # Get the bucketlist with the id specified from the URL (<int:id>)
+                bucketlist = Bucketlist.query.filter_by(id=id).first()
+                if not bucketlist:
+                    # There is no bucketlist with this ID for this User, so
+                    # Raise an HTTPException with a 404 not found status code
+                    abort(404)
+
+                # Get the bucketlist item with the id specified from the URL (<int:item_id>)
+                bucketlist_item = BucketlistItem.query.filter_by(id=item_id).first()
+                if not bucketlist_item:
+                    # There is no bucketlist item with this ID for this User, so
+                    # Raise an HTTPException with a 404 not found status code
+                    abort(404)
+
+                if request.method == "DELETE":
+                    # delete the bucketlist using our delete method
+                    bucketlist_item.delete()
+                    return {
+                               "message": "bucketlist item {} deleted".format(bucketlist_item.id)
+                           }, 200
+
+                elif request.method == 'PUT':
+                    # Obtain the new name of the bucketlist item from the request data
+                    name = str(request.data.get('name', ''))
+
+                    bucketlist_item.name = name
+                    bucketlist_item.save()
+
+                    response = {
+                        'id': bucketlist_item.id,
+                        'name': bucketlist_item.name,
+                        'date_created': bucketlist_item.date_created,
+                        'date_modified': bucketlist_item.date_modified,
+                        'done': bucketlist_item.done
+                    }
+                    return make_response(jsonify(response)), 200
+                else:
+                    # Handle GET request, sending back the bucketlist to the user
+                    response = {
+                        'id': bucketlist_item.id,
+                        'name': bucketlist_item.name,
+                        'date_created': bucketlist_item.date_created,
+                        'date_modified': bucketlist_item.date_modified,
+                        'done': bucketlist_item.done
+                    }
+                    return make_response(jsonify(response)), 200
+            else:
+                # user is not legit, so the payload is an error message
+                message = user_id
+                response = {
+                    'message': message
+                }
+                # return an error response, telling the user he is Unauthorized
+                return make_response(jsonify(response)), 401
+
     # import the authentication blueprint and register it on the app
     from .auth import auth_blueprint
     app.register_blueprint(auth_blueprint)
