@@ -78,11 +78,10 @@ def create_app(config_name):
                 return make_response(jsonify(response)), 401
 
     @app.route('/bucketlists/<int:id>', methods=['GET', 'PUT', 'DELETE'])
-    def bucketlist_manipulation(id, **kwargs):
+    def bucketlist_manipulation(id):
         """
         Method to retrieve a bucketlist of a given id and then manipulate it accordingly
         :param id:
-        :param kwargs:
         :return: response
         """
         # get the access token from the authorization header
@@ -140,7 +139,7 @@ def create_app(config_name):
                 response = {
                     'message': message
                 }
-                # return an error response, telling the user he is Unauthorized
+                # return an error response, telling the user he is unauthorized
                 return make_response(jsonify(response)), 401
 
     # import the authentication blueprint and register it on the app
