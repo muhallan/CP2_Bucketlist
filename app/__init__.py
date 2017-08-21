@@ -23,6 +23,7 @@ def create_app(config_name):
     db.init_app(app)
 
     @app.route('/bucketlists/', methods=['POST', 'GET'])
+    @app.route('/bucketlists', methods=['POST', 'GET']) # for query parameter for pagination
     def bucketlists():
         """
         Method to add a bucketlist or retrieve all bucketlists
@@ -54,11 +55,27 @@ def create_app(config_name):
                         return make_response(response), 201
 
                 else:
+                    # get the query string for limit if it exists and for pagination
+                    # if the query parameter for limit doesn't exist, 20 is used by default
+                    limit = request.args.get('limit', 'default 20')
+                    try:
+                        limit = int(limit)
+                    except ValueError:
+                        # if limit value is gibberish, default to 20
+                        limit = 20
+
+                    # if limit supplied is greater than 100, display only 100
+                    if limit > 100:
+                        limit = 100
+
+                    # set the default page to display to 1
+                    page = 1
+
                     # GET all the bucketlists created by this user
-                    bucketlists = Bucketlist.query.filter_by(created_by=user_id)
+                    bucketlists = Bucketlist.query.filter_by(created_by=user_id).paginate(page, limit)
                     results = []
 
-                    for bucketlist in bucketlists:
+                    for bucketlist in bucketlists.items:
                         obj = {
                             'id': bucketlist.id,
                             'name': bucketlist.name,
