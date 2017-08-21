@@ -92,7 +92,7 @@ class BucketlistTestCase(unittest.TestCase):
 
     def test_api_can_get_all_bucketlists_with_pagination(self):
         """
-        Test if all the bucketlists can be retrieved
+        Test if all the bucketlists can be retrieved when a limit query parameter is provided
         :return:
         """
         self.register_user()
@@ -110,6 +110,31 @@ class BucketlistTestCase(unittest.TestCase):
         # GET request while supplying a limit as a query parameter
         res = self.client().get(
             '/bucketlists?limit=30',
+            headers=dict(Authorization="Bearer " + access_token),
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Go to Grand canyon', str(res.data))
+
+    def test_api_can_get_all_bucketlists_with_search_query(self):
+        """
+        Test if all the bucketlists can be retrieved when a search query parameter is provided
+        :return:
+        """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        # create a bucketlist by making a POST request
+        res = self.client().post(
+            '/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.bucketlist)
+        self.assertEqual(res.status_code, 201)
+
+        # get all the bucketlists that belong to the test user by making a
+        # GET request while supplying a limit as a query parameter
+        res = self.client().get(
+            '/bucketlists?q=canyon',
             headers=dict(Authorization="Bearer " + access_token),
         )
         self.assertEqual(res.status_code, 200)
@@ -229,7 +254,7 @@ class BucketlistTestCase(unittest.TestCase):
         self.assertIn('Eat fried', str(res.data))
 
     def test_update_bucketlist_item(self):
-        """Test if a bucketlist item can be edited (PUT Request)"""
+        """Test if a bucketlist item can be edited"""
         self.register_user()
         result = self.login_user()
         access_token = json.loads(result.data.decode())['access_token']
