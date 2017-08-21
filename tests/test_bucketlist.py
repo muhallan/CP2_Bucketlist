@@ -90,6 +90,31 @@ class BucketlistTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn('Go to Grand canyon', str(res.data))
 
+    def test_api_can_get_all_bucketlists_with_pagination(self):
+        """
+        Test if all the bucketlists can be retrieved
+        :return:
+        """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        # create a bucketlist by making a POST request
+        res = self.client().post(
+            '/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.bucketlist)
+        self.assertEqual(res.status_code, 201)
+
+        # get all the bucketlists that belong to the test user by making a
+        # GET request while supplying a limit as a query parameter
+        res = self.client().get(
+            '/bucketlists?limit=30',
+            headers=dict(Authorization="Bearer " + access_token),
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Go to Grand canyon', str(res.data))
+
     def test_api_can_get_bucketlist_by_id(self):
         """
         Test if a single bucketlist can be retrieved by its id
