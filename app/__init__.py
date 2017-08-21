@@ -14,7 +14,7 @@ def create_app(config_name):
     :param config_name:
     :return: app
     """
-    from app.models import Bucketlist, User
+    from app.models import Bucketlist, User, BucketlistItem
 
     app = FlaskAPI(__name__, instance_relative_config=True)
     app.config.from_pyfile('config.py')
@@ -140,6 +140,53 @@ def create_app(config_name):
                     'message': message
                 }
                 # return an error response, telling the user he is unauthorized
+                return make_response(jsonify(response)), 401
+
+    @app.route('/bucketlists/<int:id>/items/', methods=['POST'])
+    def bucketlist_items(id):
+        """
+        Method that executes creation of a new bucketlist item and adding it to the given bucketlist with <id>:id
+        :param id:
+        :return:
+        """
+        # Get the access token from the header
+        auth_header = request.headers.get('Authorization')
+        access_token = auth_header.split(" ")[1]
+
+        if access_token:
+            # Attempt to decode the token and get the User ID
+            user_id = User.decode_token(access_token)
+            if not isinstance(user_id, str):
+                # Go ahead and handle the request, the user is authenticated
+
+                # Get the bucketlist with the id specified from the URL (<int:id>)
+                bucketlist = Bucketlist.query.filter_by(id=id).first()
+                if not bucketlist:
+                    # There is no bucketlist with this ID for this User, so
+                    # Raise an HTTPException with a 404 not found status code
+                    abort(404)
+
+                if request.method == "POST":
+                    name = str(request.data.get('name', ''))
+                    if name:
+                        # Get the bucketlist items from the bucketlist with the id specified from the URL (<int:id>)
+                        bucketlist_item = BucketlistItem(name=name, belongs_to=id)
+                        bucketlist_item.save()
+                        response = jsonify({
+                            'id': bucketlist_item.id,
+                            'name': bucketlist_item.name,
+                            'date_created': bucketlist_item.date_created,
+                            'date_modified': bucketlist_item.date_modified,
+                            'done': bucketlist_item.done
+                        })
+
+                        return make_response(response), 201
+            else:
+                # user is not legit, so the payload is an error message
+                message = user_id
+                response = {
+                    'message': message
+                }
                 return make_response(jsonify(response)), 401
 
     # import the authentication blueprint and register it on the app
