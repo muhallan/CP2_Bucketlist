@@ -1,6 +1,6 @@
 from flask_api import FlaskAPI
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_
+import json
 # local import
 from instance.config import app_config
 from flask import request, jsonify, abort, make_response
@@ -91,6 +91,14 @@ def create_app(config_name):
                             'name': bucketlist.name,
                             'date_created': bucketlist.date_created,
                             'date_modified': bucketlist.date_modified,
+                            'items': [{'id': item.id,
+                                       'name': item.name,
+                                       'date_created': item.date_created,
+                                       'date_modified': item.date_modified,
+                                       'done': item.done
+                                       }
+                                      for item in bucketlist.bucketlist_items
+                                      ],
                             'created_by': bucketlist.created_by
                         }
                         results.append(obj)
