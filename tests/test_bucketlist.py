@@ -60,7 +60,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # create a bucketlist by making a POST request
         res = self.client().post(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
             data=self.bucketlist)
         self.assertEqual(res.status_code, 201)
@@ -77,14 +77,14 @@ class BucketlistTestCase(unittest.TestCase):
 
         # create a bucketlist by making a POST request
         res = self.client().post(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
             data=self.bucketlist)
         self.assertEqual(res.status_code, 201)
 
         # get all the bucketlists that belong to the test user by making a GET request
         res = self.client().get(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
         )
         self.assertEqual(res.status_code, 200)
@@ -101,7 +101,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # create a bucketlist by making a POST request
         res = self.client().post(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
             data=self.bucketlist)
         self.assertEqual(res.status_code, 201)
@@ -109,7 +109,7 @@ class BucketlistTestCase(unittest.TestCase):
         # get all the bucketlists that belong to the test user by making a
         # GET request while supplying a limit as a query parameter
         res = self.client().get(
-            '/bucketlists?limit=30',
+            '/api/v1/bucketlists?limit=30',
             headers=dict(Authorization="Bearer " + access_token),
         )
         self.assertEqual(res.status_code, 200)
@@ -126,7 +126,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # create a bucketlist by making a POST request
         res = self.client().post(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
             data=self.bucketlist)
         self.assertEqual(res.status_code, 201)
@@ -134,7 +134,7 @@ class BucketlistTestCase(unittest.TestCase):
         # get all the bucketlists that belong to the test user by making a
         # GET request while supplying a limit as a query parameter
         res = self.client().get(
-            '/bucketlists?q=canyon',
+            '/api/v1/bucketlists?q=canyon',
             headers=dict(Authorization="Bearer " + access_token),
         )
         self.assertEqual(res.status_code, 200)
@@ -150,7 +150,7 @@ class BucketlistTestCase(unittest.TestCase):
         access_token = json.loads(result.data.decode())['access_token']
 
         res = self.client().post(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
             data=self.bucketlist)
 
@@ -160,7 +160,7 @@ class BucketlistTestCase(unittest.TestCase):
         results = json.loads(res.data.decode())
 
         result = self.client().get(
-            '/bucketlists/{}'.format(results['id']),
+            '/api/v1/bucketlists/{}'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token))
         # assert that the bucketlist is actually returned given its ID
         self.assertEqual(result.status_code, 200)
@@ -177,7 +177,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # first, we create a bucketlist by making a POST request
         res = self.client().post(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
             data={'name': 'Visit the Grand canyon'})
         self.assertEqual(res.status_code, 201)
@@ -186,7 +186,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # then, we edit the created bucketlist by making a PUT request
         res = self.client().put(
-            '/bucketlists/{}'.format(results['id']),
+            '/api/v1/bucketlists/{}'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token),
             data={
                 "name": "Must visit the Grand Canyon!"
@@ -195,7 +195,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # finally, we get the edited bucketlist to see if it is actually edited.
         results = self.client().get(
-            '/bucketlists/{}'.format(results['id']),
+            '/api/v1/bucketlists/{}'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token))
         self.assertIn('Must visit the', str(results.data))
 
@@ -209,7 +209,7 @@ class BucketlistTestCase(unittest.TestCase):
         access_token = json.loads(result.data.decode())['access_token']
 
         res = self.client().post(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
             data={'name': 'Visit the Grand Canyon!'})
         self.assertEqual(res.status_code, 201)
@@ -218,13 +218,13 @@ class BucketlistTestCase(unittest.TestCase):
 
         # delete the bucketlist we just created
         res = self.client().delete(
-            '/bucketlists/{}'.format(results['id']),
+            '/api/v1/bucketlists/{}'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token), )
         self.assertEqual(res.status_code, 200)
 
         # Test to see if it exists, should return a 404
         result = self.client().get(
-            '/bucketlists/1',
+            '/api/v1/bucketlists/1',
             headers=dict(Authorization="Bearer " + access_token))
         self.assertEqual(result.status_code, 404)
 
@@ -236,7 +236,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # create a bucketlist by making a POST request
         res = self.client().post(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
             data=self.bucketlist)
         self.assertEqual(res.status_code, 201)
@@ -245,7 +245,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # create a bucketlist item by making a POST request and add it to the created bucketlist
         res = self.client().post(
-            '/bucketlists/{}/items/'.format(results['id']),
+            '/api/v1/bucketlists/{}/items/'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token),
             data={
                 "name": "Eat fried crabs"
@@ -261,7 +261,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # create a bucketlist by making a POST request
         res = self.client().post(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
             data=self.bucketlist)
         self.assertEqual(res.status_code, 201)
@@ -270,7 +270,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # create a bucketlist item by making a POST request and add it to the created bucketlist
         res = self.client().post(
-            '/bucketlists/{}/items/'.format(results['id']),
+            '/api/v1/bucketlists/{}/items/'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token),
             data={
                 "name": "Eat fried crabs"
@@ -281,7 +281,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # then, we edit the created bucketlist by making a PUT request
         rv = self.client().put(
-            '/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
+            '/api/v1/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
             headers=dict(Authorization="Bearer " + access_token),
             data={
                 "name": "Eat fried crabs mixed with honey"
@@ -289,9 +289,8 @@ class BucketlistTestCase(unittest.TestCase):
         self.assertEqual(rv.status_code, 200)
 
         # finally, we get the edited bucketlist to see if it is actually edited.
-        # TODO requires implementing a GET for this too
         results = self.client().get(
-            '/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
+            '/api/v1/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
             headers=dict(Authorization="Bearer " + access_token))
         self.assertIn('mixed with honey', str(results.data))
 
@@ -303,7 +302,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # create a bucketlist by making a POST request
         res = self.client().post(
-            '/bucketlists/',
+            '/api/v1/bucketlists/',
             headers=dict(Authorization="Bearer " + access_token),
             data=self.bucketlist)
         self.assertEqual(res.status_code, 201)
@@ -312,7 +311,7 @@ class BucketlistTestCase(unittest.TestCase):
 
         # create a bucketlist item by making a POST request and add it to the created bucketlist
         res = self.client().post(
-            '/bucketlists/{}/items/'.format(results['id']),
+            '/api/v1/bucketlists/{}/items/'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token),
             data={
                 "name": "Eat fried crabs"
@@ -323,14 +322,13 @@ class BucketlistTestCase(unittest.TestCase):
 
         # delete the bucketlist item we just created
         res = self.client().delete(
-            '/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
+            '/api/v1/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
             headers=dict(Authorization="Bearer " + access_token), )
         self.assertEqual(res.status_code, 200)
 
         # Test to see if it exists, should return a 404
-        # TODO requires implementing a GET for this too
         result = self.client().get(
-            '/bucketlists/{}/items/1'.format(results['id']),
+            '/api/v1/bucketlists/{}/items/1'.format(results['id']),
             headers=dict(Authorization="Bearer " + access_token))
         self.assertEqual(result.status_code, 404)
 
