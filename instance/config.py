@@ -6,11 +6,11 @@ class Config(object):
     """Parent configuration class."""
     DEBUG = False
     CSRF_ENABLED = True
-    SECRET = os.getenv('SECRET')
-    #SECRET = 'theboythatwentaway'
+    # SECRET = os.getenv('SECRET')
+    SECRET = 'theboythatwentaway'
     # SECRET_KEY = 'theboythatwentaway'
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    #SQLALCHEMY_DATABASE_URI = "postgresql://localhost/bucketlist_api"
+    # SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = "postgresql://localhost/bucketlist_api"
 
 
 class DevelopmentConfig(Config):
