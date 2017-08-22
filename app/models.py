@@ -137,6 +137,7 @@ class Bucketlist(db.Model):
         """
         return "<Bucketlist: {}>".format(self.name)
 
+
 class BucketlistItem(db.Model):
     """This class defines the bucketlist_items table"""
 
