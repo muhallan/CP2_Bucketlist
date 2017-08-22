@@ -31,7 +31,7 @@ class AuthTestCase(unittest.TestCase):
         Method to test if user registration works correctly
         :return:
         """
-        res = self.client().post('/auth/register', data=self.user_data)
+        res = self.client().post('/api/v1/auth/register', data=self.user_data)
         # get the results returned in json format
         result = json.loads(res.data.decode())
         # assert that the request contains a success message and a 201 status code
@@ -43,9 +43,9 @@ class AuthTestCase(unittest.TestCase):
         Test to see if a user who is already existing can be registered again
         :return:
         """
-        res = self.client().post('/auth/register', data=self.user_data)
+        res = self.client().post('/api/v1/auth/register', data=self.user_data)
         self.assertEqual(res.status_code, 201)
-        second_res = self.client().post('/auth/register', data=self.user_data)
+        second_res = self.client().post('/api/v1/auth/register', data=self.user_data)
         self.assertEqual(second_res.status_code, 202)
         # get the results returned in json format
         result = json.loads(second_res.data.decode())
@@ -57,9 +57,9 @@ class AuthTestCase(unittest.TestCase):
         Test if a user who is registered can login successfully
         :return:
         """
-        res = self.client().post('/auth/register', data=self.user_data)
+        res = self.client().post('/api/v1/auth/register', data=self.user_data)
         self.assertEqual(res.status_code, 201)
-        login_res = self.client().post('/auth/login', data=self.user_data)
+        login_res = self.client().post('/api/v1/auth/login', data=self.user_data)
 
         # get the results in json format
         result = json.loads(login_res.data.decode())
@@ -80,7 +80,7 @@ class AuthTestCase(unittest.TestCase):
             'password': 'nope'
         }
         # send a POST request to /auth/login with the data above
-        res = self.client().post('/auth/login', data=not_a_user)
+        res = self.client().post('/api/v1/auth/login', data=not_a_user)
         # get the result in json
         result = json.loads(res.data.decode())
 
