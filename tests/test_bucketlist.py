@@ -34,7 +34,7 @@ class BucketlistTestCase(unittest.TestCase):
             'email': email,
             'password': password
         }
-        return self.client().post('/auth/register', data=user_data)
+        return self.client().post('/api/v1/auth/register', data=user_data)
 
     def login_user(self, email="user@test.com", password="test1234"):
         """
@@ -47,7 +47,7 @@ class BucketlistTestCase(unittest.TestCase):
             'email': email,
             'password': password
         }
-        return self.client().post('/auth/login', data=user_data)
+        return self.client().post('api/v1/auth/login', data=user_data)
 
     def test_bucketlist_creation(self):
         """
