@@ -1,8 +1,6 @@
 language: python
 python:
-  - "2.6"
   - "2.7"
-  - "3.2"
   - "3.3"
   - "3.4"
   - "3.5"
@@ -15,6 +13,13 @@ python:
 # Add any extra services that travis can use
 services:
   - postgresql
+
+# Add environment variables
+env:
+  - FLASK_APP="run.py"
+  - SECRET="theboythatwentaway"
+  - APP_SETTINGS="development"
+  - DATABASE_URL="postgresql://localhost/test_db
 
 # command to install dependencies
 install:
