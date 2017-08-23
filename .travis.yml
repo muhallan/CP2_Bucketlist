@@ -36,5 +36,3 @@ script: coverage run manage.py test
 # Commands run after the script command
 after_success:
   coveralls
-#    - if [[ $ENV == python=3.6* ]]; then
-#      fi
