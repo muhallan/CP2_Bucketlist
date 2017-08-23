@@ -1,13 +1,31 @@
 language: python
 python:
-  - 3.6
+  - "2.6"
+  - "2.7"
+  - "3.2"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.5-dev" # 3.5 development branch
+  - "3.6"
+  - "3.6-dev" # 3.6 development branch
+  - "3.7-dev" # 3.7 development branch
+  - "nightly" # currently points to 3.7-dev
+
+# Add any extra services that travis can use
+services:
+  - postgresql
 
 # command to install dependencies
 install:
-  - pip install -r requirements.txt
-  - pip install coveralls
+  - "pip install -r requirements.txt"
+
+# Commands run before running scipt command
+before_script:
+  - psql -c 'create database test_db;' -U postgres
+
 # command to run tests
-script:
-  coverage run --source=python manage.py test
-after_success:
-  coveralls
+script: python manage.py test
+
+# Commands run after the script command
+after_success: coveralls
