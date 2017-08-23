@@ -16,10 +16,10 @@ services:
 
 # Add environment variables
 env:
-  - FLASK_APP="run.py"
-  - SECRET="theboythatwentaway"
-  - APP_SETTINGS="development"
-  - DATABASE_URL="postgresql://localhost/test_db
+  - FLASK_APP=run.py
+  - SECRET=theboythatwentaway
+  - APP_SETTINGS=development
+  - DATABASE_URL=postgresql://localhost/test_db
 
 # command to install dependencies
 install:
