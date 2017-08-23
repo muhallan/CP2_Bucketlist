@@ -1,2 +1,6 @@
 .idea/
 .git/
+htmlcov/
+.coverage
+__pycache__/
+migrations/versions/
