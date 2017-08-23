@@ -35,6 +35,7 @@ script: coverage run --source CP2_Bucketlist manage.py test
 
 # Commands run after the script command
 after_success:
-    - if [[ $ENV == python=3.6* ]]; then
-          coveralls;
-      fi
+  coveralls
+  
+#    - if [[ $ENV == python=3.6* ]]; then
+#      fi
