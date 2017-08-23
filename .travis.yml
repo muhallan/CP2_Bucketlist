@@ -19,7 +19,7 @@ env:
   global:
     - FLASK_APP=run.py
     - SECRET=theboythatwentaway
-    - APP_SETTINGS=development
+    - APP_SETTINGS=testing
     - DATABASE_URL=postgresql://localhost/test_db
 
 # command to install dependencies
