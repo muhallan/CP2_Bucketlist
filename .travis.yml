@@ -31,7 +31,10 @@ before_script:
   - psql -c 'create database test_db;' -U postgres
 
 # command to run tests
-script: python manage.py test
+script: coverage run --source CP2_Bucketlist manage.py test
 
 # Commands run after the script command
-after_success: coveralls
+after_success:
+    - if [[ $ENV == python=3.6* ]]; then
+          coveralls;
+      fi
