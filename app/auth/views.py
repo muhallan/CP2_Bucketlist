@@ -1,3 +1,4 @@
+import re
 from . import auth_blueprint
 
 from flask.views import MethodView
@@ -14,39 +15,111 @@ class RegistrationView(MethodView):
         Url is at /auth/register
         :return:
         """
-
-        # check to see if the user already exists
-        user = User.query.filter_by(email=request.data['email']).first()
-
-        if not user:
-            # There is no user so we'll try to register them
-            try:
-                post_data = request.data
-                # Register the user
-                email = post_data['email']
-                password = post_data['password']
-                user = User(email=email, password=password)
-                user.save()
-
-                response = {
-                    'message': 'You registered successfully. Please log in.'
-                }
-                # return a response notifying the user that they registered successfully
-                return make_response(jsonify(response)), 201
-            except Exception as e:
-                # An error occured, therefore return a string message containing the error
-                response = {
-                    'message': str(e)
-                }
-                return make_response(jsonify(response)), 401
-        else:
-            # There is an existing user.
-            # Return a message to the user telling them that they they already exist
+        if 'email' not in request.data and 'password' not in request.data:
+            # Return a message to the user telling them that they need to submit the email and password
             response = {
-                'message': 'User already exists. Please login.'
+                'message': 'Email address and password not provided.'
             }
+            return make_response(jsonify(response)), 400
 
-            return make_response(jsonify(response)), 202
+        elif 'email' not in request.data:
+            # Return a message to the user telling them that they need to submit the email
+            response = {
+                'message': 'Email address not provided.'
+            }
+            return make_response(jsonify(response)), 400
+
+        elif 'password' not in request.data:
+            # Return a message to the user telling them that they need to submit the password
+            response = {
+                'message': 'Password not provided.'
+            }
+            return make_response(jsonify(response)), 400
+        else:
+            email = request.data['email']
+            password = request.data['password']
+
+            # check if an email and a password were both not empty
+            if not email and not password:
+                print("here")
+                # Return a message to the user telling them that they need to submit the email and password
+                response = {
+                    'message': 'Email address and password is empty.'
+                }
+                return make_response(jsonify(response)), 400
+
+            # check if an email was empty
+            elif not email:
+                # Return a message to the user telling them that they need to submit the email
+                response = {
+                    'message': 'Email address is empty.'
+                }
+                return make_response(jsonify(response)), 400
+
+            # check if a password was empty
+            elif not password:
+                # Return a message to the user telling them that they need to submit the password
+                response = {
+                    'message': 'Password is empty.'
+                }
+                return make_response(jsonify(response)), 400
+
+            # both parameters provided
+            else:
+                if (not re.match("^[^@]+@[^@]+\.[^@]+$", email)) and (len(password) < 5):
+                    # Return a message to the user telling them that they need to submit a correct email and password
+                    response = {
+                        'message': 'Invalid email address and short password.'
+                    }
+                    return make_response(jsonify(response)), 400
+
+                elif not re.match("^[^@]+@[^@]+\.[^@]+$", email):
+                    # Return a message to the user telling them that they need to submit a correct email
+                    response = {
+                        'message': 'Invalid email address.'
+                    }
+                    return make_response(jsonify(response)), 400
+
+                elif len(password) < 5:
+                    # Return a message to the user telling them that they need to submit a correct password
+                    response = {
+                        'message': 'Password too short.'
+                    }
+                    return make_response(jsonify(response)), 400
+
+                else:
+                    # check to see if the user already exists
+                    user = User.query.filter_by(email=request.data['email']).first()
+
+                    if not user:
+                        # There is no user so we'll try to register them
+                        try:
+                            post_data = request.data
+                            # Register the user
+                            email = post_data['email']
+                            password = post_data['password']
+                            user = User(email=email, password=password)
+                            user.save()
+
+                            response = {
+                                'message': 'You registered successfully. Please log in.'
+                            }
+                            # return a response notifying the user that they registered successfully
+                            return make_response(jsonify(response)), 201
+                        except Exception as e:
+                            # An error occured, therefore return a string message containing the error
+                            response = {
+                                'message': str(e)
+                            }
+                            return make_response(jsonify(response)), 401
+                    else:
+                        # There is an existing user.
+                        # Return a message to the user telling them that they already exist
+                        response = {
+                            'message': 'User already exists. Please login.'
+                        }
+
+                        return make_response(jsonify(response)), 409
 
 
 class LoginView(MethodView):
