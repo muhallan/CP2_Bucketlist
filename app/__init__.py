@@ -18,6 +18,9 @@ def create_app(config_name):
     app.config.from_pyfile('config.py')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config.from_object(app_config[config_name])
+
+    # for removing trailing slashes enforcement
+    app.url_map.strict_slashes = False
     db.init_app(app)
 
     # import the authentication blueprint and register it on the app
