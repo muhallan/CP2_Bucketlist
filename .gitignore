@@ -3,4 +3,3 @@
 htmlcov/
 .coverage
 __pycache__/
-migrations/versions/
