@@ -46,11 +46,150 @@ class AuthTestCase(unittest.TestCase):
         res = self.client().post('/api/v1/auth/register', data=self.user_data)
         self.assertEqual(res.status_code, 201)
         second_res = self.client().post('/api/v1/auth/register', data=self.user_data)
-        self.assertEqual(second_res.status_code, 202)
+        self.assertEqual(second_res.status_code, 409)
         # get the results returned in json format
         result = json.loads(second_res.data.decode())
         self.assertEqual(
             result['message'], "User already exists. Please login.")
+
+    def test_missing_register_params(self):
+        """
+        Test if a correct message is returned when no parameters are supplied for registration
+        :return:
+        """
+        # define an empty dictionary to represent no data supplied
+        no_data = {}
+        res = self.client().post('/api/v1/auth/register', data=no_data)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Email address and password not provided.")
+
+    def test_missing_register_email_param(self):
+        """
+        Test if a correct message is returned when no email parameter is supplied for registration
+        :return:
+        """
+        # define a dictionary with missing email key
+        password_data = {
+            'password': 'password'
+        }
+        res = self.client().post('/api/v1/auth/register', data=password_data)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Email address not provided.")
+
+    def test_missing_register_password_param(self):
+        """
+        Test if a correct message is returned when no password parameter is supplied for registration
+        :return:
+        """
+        # define a dictionary with missing password key
+        email_data = {
+            'email': 'email'
+        }
+        res = self.client().post('/api/v1/auth/register', data=email_data)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Password not provided.")
+
+    def test_register_empty_params(self):
+        """
+        Test if a correct message is returned when empty parameters are supplied for registration
+        :return:
+        """
+        # define a dictionary with missing email key
+        empty_data = {
+            'email': '',
+            'password': ''
+        }
+        res = self.client().post('/api/v1/auth/register', data=empty_data)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Email address and password is empty.")
+
+    def test_register_empty_email(self):
+        """
+        Test if a correct message is returned when an empty email is supplied for registration
+        :return:
+        """
+        # define a dictionary with missing email key
+        empty_email = {
+            'email': '',
+            'password': 'password'
+        }
+        res = self.client().post('/api/v1/auth/register', data=empty_email)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Email address is empty.")
+
+    def test_register_empty_password(self):
+        """
+        Test if a correct message is returned when an empty password is supplied for registration
+        :return:
+        """
+        # define a dictionary with missing password key
+        empty_password = {
+            'email': 'email@company.com',
+            'password': ''
+        }
+        res = self.client().post('/api/v1/auth/register', data=empty_password)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Password is empty.")
+
+    def test_register_invalid_email(self):
+        """
+        Test if a correct message is returned when an invalid email is supplied for registration
+        :return:
+        """
+        # define a dictionary with an invalid email key
+        fake_email = {
+            'email': 'email',
+            'password': 'password'
+        }
+        res = self.client().post('/api/v1/auth/register', data=fake_email)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Invalid email address.")
+
+    def test_register_short_password(self):
+        """
+        Test if a correct message is returned when a short password is supplied for registration
+        :return:
+        """
+        # define a dictionary with missing email key
+        fake_email = {
+            'email': 'email@company.co',
+            'password': 'pass'
+        }
+        res = self.client().post('/api/v1/auth/register', data=fake_email)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Password too short.")
+
+    def test_register_short_password_and_invalid_email(self):
+        """
+        Test if a correct message is returned when a short password and an invalid email are supplied for registration
+        :return:
+        """
+        # define a dictionary with an invalid email and short password
+        fake_email = {
+            'email': 'email',
+            'password': 'pass'
+        }
+        res = self.client().post('/api/v1/auth/register', data=fake_email)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Invalid email address and short password.")
 
     def test_user_login(self):
         """
@@ -89,3 +228,12 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 401)
         self.assertEqual(
             result['message'], "Invalid email or password, Please try again")
+
+    def tearDown(self):
+        """teardown all initialized variables."""
+        with self.app.app_context():
+            # drop all tables
+            db.session.remove()
+            db.drop_all()
+    # TODO test what happens when not all credentials are not given
+    # TODO email validation
