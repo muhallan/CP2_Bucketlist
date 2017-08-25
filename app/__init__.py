@@ -1,12 +1,13 @@
 from flask_api import FlaskAPI
 from flask_sqlalchemy import SQLAlchemy
+from flasgger import Swagger
 
 # local import
 from instance.config import app_config
 
 # initialize sql-alchemy
 db = SQLAlchemy()
-
+swagger = Swagger()
 
 def create_app(config_name):
     """
@@ -22,6 +23,8 @@ def create_app(config_name):
     # for removing trailing slashes enforcement
     app.url_map.strict_slashes = False
     db.init_app(app)
+
+    swagger.init_app(app)
 
     # import the authentication blueprint and register it on the app
     from .auth import auth_blueprint
