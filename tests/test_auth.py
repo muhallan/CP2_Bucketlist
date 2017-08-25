@@ -100,7 +100,7 @@ class AuthTestCase(unittest.TestCase):
         Test if a correct message is returned when empty parameters are supplied for registration
         :return:
         """
-        # define a dictionary with missing email key
+        # define a dictionary with empty params
         empty_data = {
             'email': '',
             'password': ''
@@ -116,7 +116,7 @@ class AuthTestCase(unittest.TestCase):
         Test if a correct message is returned when an empty email is supplied for registration
         :return:
         """
-        # define a dictionary with missing email key
+        # define a dictionary with empty email
         empty_email = {
             'email': '',
             'password': 'password'
@@ -132,7 +132,7 @@ class AuthTestCase(unittest.TestCase):
         Test if a correct message is returned when an empty password is supplied for registration
         :return:
         """
-        # define a dictionary with missing password key
+        # define a dictionary with empty password
         empty_password = {
             'email': 'email@company.com',
             'password': ''
@@ -164,7 +164,7 @@ class AuthTestCase(unittest.TestCase):
         Test if a correct message is returned when a short password is supplied for registration
         :return:
         """
-        # define a dictionary with missing email key
+        # define a dictionary with short passsword
         fake_email = {
             'email': 'email@company.co',
             'password': 'pass'
@@ -228,6 +228,112 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 401)
         self.assertEqual(
             result['message'], "Invalid email or password, Please try again")
+
+    def test_login_no_params(self):
+        """
+        Test if a correct message is returned when no parameter are supplied for the login
+        :return:
+        """
+        # define an empty dictionary to represent empty params
+        no_params = {}
+        # send a POST request to /auth/login with the data above
+        res = self.client().post('/api/v1/auth/login', data=no_params)
+        # get the result in json
+        result = json.loads(res.data.decode())
+
+        # assert that this response must contain an error message
+        # and an error status code 401(Unauthorized)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(
+            result['message'], "Email address and password not provided.")
+
+    def test_login_no_email_param(self):
+        """
+        Test if a correct message is returned when no email parameter is supplied for the login
+        :return:
+        """
+        # define a dictionary to represent empty email params
+        no_email = {
+            'password': 'nonepass'
+        }
+        # send a POST request to /auth/login with the data above
+        res = self.client().post('/api/v1/auth/login', data=no_email)
+        # get the result in json
+        result = json.loads(res.data.decode())
+
+        # assert that this response must contain an error message
+        # and an error status code 401(Unauthorized)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(
+            result['message'], "Email address not provided.")
+
+    def test_login_no_pass_param(self):
+        """
+        Test if a correct message is returned when no password parameter is supplied for the login
+        :return:
+        """
+        # define a dictionary to represent empty password params
+        no_email = {
+            'email': 'email'
+        }
+        # send a POST request to /auth/login with the data above
+        res = self.client().post('/api/v1/auth/login', data=no_email)
+        # get the result in json
+        result = json.loads(res.data.decode())
+
+        # assert that this response must contain an error message
+        # and an error status code 401(Unauthorized)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(
+            result['message'], "Password not provided.")
+
+    def test_login_empty_params(self):
+        """
+        Test if a correct message is returned when empty parameters are supplied for login
+        :return:
+        """
+        # define a dictionary with empty params
+        empty_data = {
+            'email': '',
+            'password': ''
+        }
+        res = self.client().post('/api/v1/auth/login', data=empty_data)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Email address and password is empty.")
+
+    def test_login_empty_email(self):
+        """
+        Test if a correct message is returned when an empty email is supplied for registration
+        :return:
+        """
+        # define a dictionary with empty email
+        empty_email = {
+            'email': '',
+            'password': 'password'
+        }
+        res = self.client().post('/api/v1/auth/login', data=empty_email)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Email address is empty.")
+
+    def test_login_empty_password(self):
+        """
+        Test if a correct message is returned when an empty password is supplied for registration
+        :return:
+        """
+        # define a dictionary with empty password
+        empty_password = {
+            'email': 'email@company.com',
+            'password': ''
+        }
+        res = self.client().post('/api/v1/auth/login', data=empty_password)
+        self.assertEqual(res.status_code, 400)
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'], "Password is empty.")
 
     def tearDown(self):
         """teardown all initialized variables."""
