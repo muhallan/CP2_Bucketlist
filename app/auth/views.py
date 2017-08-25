@@ -127,38 +127,88 @@ class LoginView(MethodView):
 
     def post(self):
         """
-        Handle POST request for this view. This view logins in a user
+        Handle POST request for this view. This view logs in a user
         Url is /auth/login
         :return:
         """
-        try:
-            # Get the user object using their email because it is unique
-            user = User.query.filter_by(email=request.data['email']).first()
-
-            # Try to authenticate the found user using their password
-            if user and user.password_is_valid(request.data['password']):
-                # Generate the access token. This will be used as the authorization header
-                access_token = user.generate_token(user.id)
-                if access_token:
-                    response = {
-                        'message': 'You logged in successfully.',
-                        'access_token': access_token.decode()
-                    }
-                    return make_response(jsonify(response)), 200
-            else:
-                # User does not exist. Therefore, we return an error message
-                response = {
-                    'message': 'Invalid email or password, Please try again'
-                }
-                return make_response(jsonify(response)), 401
-
-        except Exception as e:
-            # Create a response containing an string error message
+        if 'email' not in request.data and 'password' not in request.data:
+            # Return a message to the user telling them that they need to submit the email and password
             response = {
-                'message': str(e)
+                'message': 'Email address and password not provided.'
             }
-            # Return a server error using the HTTP Error Code 500 (Internal Server Error)
-            return make_response(jsonify(response)), 500
+            return make_response(jsonify(response)), 400
+
+        elif 'email' not in request.data:
+            # Return a message to the user telling them that they need to submit the email
+            response = {
+                'message': 'Email address not provided.'
+            }
+            return make_response(jsonify(response)), 400
+
+        elif 'password' not in request.data:
+            # Return a message to the user telling them that they need to submit the password
+            response = {
+                'message': 'Password not provided.'
+            }
+            return make_response(jsonify(response)), 400
+        else:
+            email = request.data['email']
+            password = request.data['password']
+
+            # check if an email and a password were both not empty
+            if not email and not password:
+                print("here")
+                # Return a message to the user telling them that they need to submit the email and password
+                response = {
+                    'message': 'Email address and password is empty.'
+                }
+                return make_response(jsonify(response)), 400
+
+            # check if an email was empty
+            elif not email:
+                # Return a message to the user telling them that they need to submit the email
+                response = {
+                    'message': 'Email address is empty.'
+                }
+                return make_response(jsonify(response)), 400
+
+            # check if a password was empty
+            elif not password:
+                # Return a message to the user telling them that they need to submit the password
+                response = {
+                    'message': 'Password is empty.'
+                }
+                return make_response(jsonify(response)), 400
+
+            else:
+                try:
+                    # Get the user object using their email because it is unique
+                    user = User.query.filter_by(email=request.data['email']).first()
+
+                    # Try to authenticate the found user using their password
+                    if user and user.password_is_valid(request.data['password']):
+                        # Generate the access token. This will be used as the authorization header
+                        access_token = user.generate_token(user.id)
+                        if access_token:
+                            response = {
+                                'message': 'You logged in successfully.',
+                                'access_token': access_token.decode()
+                            }
+                            return make_response(jsonify(response)), 200
+                    else:
+                        # User does not exist. Therefore, we return an error message
+                        response = {
+                            'message': 'Invalid email or password, Please try again'
+                        }
+                        return make_response(jsonify(response)), 401
+
+                except Exception as e:
+                    # Create a response containing an string error message
+                    response = {
+                        'message': str(e)
+                    }
+                    # Return a server error using the HTTP Error Code 500 (Internal Server Error)
+                    return make_response(jsonify(response)), 500
 
 
 registration_view = RegistrationView.as_view('register_view')
