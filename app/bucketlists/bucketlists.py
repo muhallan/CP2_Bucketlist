@@ -1,9 +1,9 @@
 from . import bucketlists_blueprint
+from sqlalchemy import and_
 from flask import request, jsonify, abort, make_response
 from app.models import Bucketlist, User, BucketlistItem
 
 
-@bucketlists_blueprint.route('/bucketlists/', methods=['POST', 'GET'])
 # for query parameter for pagination and searching
 @bucketlists_blueprint.route('/bucketlists', methods=['POST', 'GET'])
 def bucketlists():
@@ -11,87 +11,139 @@ def bucketlists():
     Method to add a bucketlist or retrieve all bucketlists
     :return: response
     """
-    # Get the access token from the header
-    auth_header = request.headers.get('Authorization')
-    access_token = auth_header.split(" ")[1]
 
-    if access_token:
-        # Attempt to decode the token and get the User ID
-        user_id = User.decode_token(access_token)
-        if not isinstance(user_id, str):
-            # Go ahead and handle the request, the user is authenticated
+    # check if the header with key is present
+    if 'Authorization' not in request.headers:
+        # Return a message to the user telling them that they need to submit an authorization header with token
+        response = {
+            'message': 'Header with key Authorization missing.'
+        }
+        return make_response(jsonify(response)), 401
+    else:
+        # Get the access token from the header
+        auth_header = request.headers.get('Authorization')
 
-            if request.method == "POST":
-                name = str(request.data.get('name', ''))
-                if name:
-                    bucketlist = Bucketlist(name=name, created_by=user_id)
-                    bucketlist.save()
-                    response = jsonify({
-                        'id': bucketlist.id,
-                        'name': bucketlist.name,
-                        'date_created': bucketlist.date_created,
-                        'date_modified': bucketlist.date_modified,
-                        'created_by': user_id
-                    })
-
-                    return make_response(response), 201
-
-            else:
-                # get the query string for limit if it exists and for pagination
-                # if the query parameter for limit doesn't exist, 20 is used by default
-                limit = request.args.get('limit', 'default 20')
-                try:
-                    limit = int(limit)
-                except ValueError:
-                    # if limit value is gibberish, default to 20
-                    limit = 20
-
-                # if limit supplied is greater than 100, display only 100
-                if limit > 100:
-                    limit = 100
-
-                # set the default page to display to 1
-                page = 1
-
-                # get the query string for q - this is searching based on name
-                search_string = request.args.get('q')
-
-                # check if a search parameter was provided
-                if search_string:
-                    # get bucketlists whose name contains the search string
-                    bucketlists = Bucketlist.query.filter_by(created_by=user_id).filter(Bucketlist.name.like('%' + search_string + '%')).paginate(page, limit)
-                else:
-                    # GET all the bucketlists created by this user
-                    bucketlists = Bucketlist.query.filter_by(created_by=user_id).paginate(page, limit)
-
-                results = []
-
-                for bucketlist in bucketlists.items:
-                    obj = {
-                        'id': bucketlist.id,
-                        'name': bucketlist.name,
-                        'date_created': bucketlist.date_created,
-                        'date_modified': bucketlist.date_modified,
-                        'items': [{'id': item.id,
-                                   'name': item.name,
-                                   'date_created': item.date_created,
-                                   'date_modified': item.date_modified,
-                                   'done': item.done
-                                   }
-                                  for item in bucketlist.bucketlist_items
-                                  ],
-                        'created_by': bucketlist.created_by
-                    }
-                    results.append(obj)
-
-                return make_response(jsonify(results)), 200
-        else:
-            # user is not legit, so the payload is an error message
-            message = user_id
+        # check for when authorization was not provided in header
+        if not auth_header:
+            # Return a message to the user telling them that they need to submit an authorization header with token
             response = {
-                'message': message
+                'message': 'Token not provided in the header with key Authorization.'
             }
             return make_response(jsonify(response)), 401
+        else:
+
+            auth_strings = auth_header.split(" ")
+            if len(auth_strings) != 2:
+                response = {
+                    'message': 'Invalid token format.'
+                }
+                return make_response(jsonify(response)), 401
+            else:
+                access_token = auth_header.split(" ")[1]
+
+                if access_token:
+                    # Attempt to decode the token and get the User ID
+                    user_id = User.decode_token(access_token)
+                    if not isinstance(user_id, str):
+                        # Go ahead and handle the request, the user is authenticated
+                        if request.method == "POST":
+                            if 'name' not in request.data:
+                                # Return a message to the user telling them that they need to submit a name
+                                response = {
+                                    'message': 'Parameter name missing.'
+                                }
+                                return make_response(jsonify(response)), 400
+                            else:
+                                name = str(request.data.get('name', ''))
+                                if name:
+                                    # query whether a bucketlist with the same name already exists
+                                    bucketlists = Bucketlist.query.filter_by(created_by=user_id, name=name).first()
+                                    if bucketlists:
+                                        # Return a message to the user telling them that they need to submit a name
+                                        response = {
+                                            'message': 'Bucketlist with this name already exists. Edit it or choose another name.'
+                                        }
+                                        return make_response(jsonify(response)), 409
+                                    else:
+                                        bucketlist = Bucketlist(name=name, created_by=user_id)
+                                        bucketlist.save()
+                                        response = jsonify({
+                                            'id': bucketlist.id,
+                                            'name': bucketlist.name,
+                                            'date_created': bucketlist.date_created,
+                                            'date_modified': bucketlist.date_modified,
+                                            'created_by': user_id
+                                        })
+
+                                        return make_response(response), 201
+                                else:
+                                    # Return a message to the user telling them that they need to submit a name
+                                    response = {
+                                        'message': 'Bucketlist name should not be empty.'
+                                    }
+                                    return make_response(jsonify(response)), 400
+
+                        else:
+                            # get the query string for limit if it exists and for pagination
+                            # if the query parameter for limit doesn't exist, 20 is used by default
+                            limit = request.args.get('limit', 'default 20')
+                            try:
+                                limit = int(limit)
+                            except ValueError:
+                                # if limit value is gibberish, default to 20
+                                limit = 20
+
+                            # if limit supplied is greater than 100, display only 100
+                            if limit > 100:
+                                limit = 100
+
+                            # set the default page to display to 1
+                            page = 1
+
+                            # get the query string for q - this is searching based on name
+                            search_string = request.args.get('q')
+
+                            # check if a search parameter was provided
+                            if search_string:
+                                # get bucketlists whose name contains the search string
+                                bucketlists = Bucketlist.query.filter_by(created_by=user_id).filter(Bucketlist.name.like('%' + search_string + '%')).paginate(page, limit)
+                            else:
+                                # GET all the bucketlists created by this user
+                                bucketlists = Bucketlist.query.filter_by(created_by=user_id).paginate(page, limit)
+
+                            results = []
+
+                            for bucketlist in bucketlists.items:
+                                obj = {
+                                    'id': bucketlist.id,
+                                    'name': bucketlist.name,
+                                    'date_created': bucketlist.date_created,
+                                    'date_modified': bucketlist.date_modified,
+                                    'items': [{'id': item.id,
+                                               'name': item.name,
+                                               'date_created': item.date_created,
+                                               'date_modified': item.date_modified,
+                                               'done': item.done
+                                               }
+                                              for item in bucketlist.bucketlist_items
+                                              ],
+                                    'created_by': bucketlist.created_by
+                                }
+                                results.append(obj)
+
+                            return make_response(jsonify(results)), 200
+                    else:
+                        # user is not legit, so the payload is an error message
+                        message = user_id
+                        response = {
+                            'message': message
+                        }
+                        return make_response(jsonify(response)), 401
+                else:
+                    response = {
+                        'message': 'Empty token string'
+                    }
+                    return make_response(jsonify(response)), 401
 
 
 @bucketlists_blueprint.route('/bucketlists/<int:id>', methods=['GET', 'PUT', 'DELETE'])
@@ -101,66 +153,114 @@ def bucketlist_manipulation(id):
     :param id:
     :return: response
     """
-    # get the access token from the authorization header
-    auth_header = request.headers.get('Authorization')
-    access_token = auth_header.split(" ")[1]
+    # check if the header with key is present
+    if 'Authorization' not in request.headers:
+        # Return a message to the user telling them that they need to submit an authorization header with token
+        response = {
+            'message': 'Header with key Authorization missing.'
+        }
+        return make_response(jsonify(response)), 401
+    else:
+        # Get the access token from the header
+        auth_header = request.headers.get('Authorization')
 
-    if access_token:
-        # Get the user id related to this access token
-        user_id = User.decode_token(access_token)
-
-        if not isinstance(user_id, str):
-            # If the id is not a string(error), we have a user id
-            # Get the bucketlist with the id specified from the URL (<int:id>)
-            bucketlist = Bucketlist.query.filter_by(id=id).first()
-            if not bucketlist:
-                # There is no bucketlist with this ID for this User, so
-                # Raise an HTTPException with a 404 not found status code
-                abort(404)
-
-            if request.method == "DELETE":
-                # delete the bucketlist using our delete method
-                bucketlist.delete()
-                return {
-                           "message": "bucketlist {} deleted".format(bucketlist.id)
-                       }, 200
-
-            elif request.method == 'PUT':
-                # Obtain the new name of the bucketlist from the request data
-                name = str(request.data.get('name', ''))
-
-                bucketlist.name = name
-                bucketlist.save()
-
-                response = {
-                    'id': bucketlist.id,
-                    'name': bucketlist.name,
-                    'date_created': bucketlist.date_created,
-                    'date_modified': bucketlist.date_modified,
-                    'created_by': bucketlist.created_by
-                }
-                return make_response(jsonify(response)), 200
-            else:
-                # Handle GET request, sending back the bucketlist to the user
-                response = {
-                    'id': bucketlist.id,
-                    'name': bucketlist.name,
-                    'date_created': bucketlist.date_created,
-                    'date_modified': bucketlist.date_modified,
-                    'created_by': bucketlist.created_by
-                }
-                return make_response(jsonify(response)), 200
-        else:
-            # user is not legit, so the payload is an error message
-            message = user_id
+        # check for when authorization was not provided in header
+        if not auth_header:
+            # Return a message to the user telling them that they need to submit an authorization header with token
             response = {
-                'message': message
+                'message': 'Token not provided in the header with key Authorization.'
             }
-            # return an error response, telling the user he is unauthorized
             return make_response(jsonify(response)), 401
+        else:
+
+            auth_strings = auth_header.split(" ")
+            if len(auth_strings) != 2:
+                response = {
+                    'message': 'Invalid token format.'
+                }
+                return make_response(jsonify(response)), 401
+            else:
+                access_token = auth_header.split(" ")[1]
+
+                if access_token:
+                        # Get the user id related to this access token
+                        user_id = User.decode_token(access_token)
+
+                        if not isinstance(user_id, str):
+                            # If the id is not a string(error), we have a user id
+                            # Get the bucketlist with the id specified from the URL (<int:id>)
+                            bucketlist = Bucketlist.query.filter_by(id=id, created_by=user_id).first()
+                            if not bucketlist:
+                                # There is no bucketlist with this ID for this User, so
+                                # Raise an HTTPException with a 404 not found status code
+                                abort(404)
+
+                            if request.method == "DELETE":
+                                # delete the bucketlist using our delete method
+                                bucketlist.delete()
+                                return {
+                                           "message": "bucketlist {} deleted".format(bucketlist.id)
+                                       }, 200
+
+                            elif request.method == 'PUT':
+                                # Obtain the new name of the bucketlist from the request data
+                                if 'name' not in request.data:
+                                    # Return a message to the user telling them that they need to submit a name
+                                    response = {
+                                        'message': 'Parameter name missing.'
+                                    }
+                                    return make_response(jsonify(response)), 400
+                                else:
+                                    name = str(request.data.get('name', ''))
+                                    if name:
+                                        # query whether a bucketlist with the same name already exists
+                                        bucketlists = Bucketlist.query.filter(and_(Bucketlist.created_by==user_id, Bucketlist.name==name, Bucketlist.id!=id)).first()
+                                        if bucketlists:
+                                            # Return a message to the user telling them that they need to submit a name
+                                            response = {
+                                                'message': 'Bucketlist with this name already exists. Choose another name.'
+                                            }
+                                            return make_response(jsonify(response)), 409
+                                        else:
+                                            bucketlist.name = name
+                                            bucketlist.save()
+
+                                            response = {
+                                                'id': bucketlist.id,
+                                                'name': bucketlist.name,
+                                                'date_created': bucketlist.date_created,
+                                                'date_modified': bucketlist.date_modified,
+                                                'created_by': bucketlist.created_by
+                                            }
+                                            return make_response(jsonify(response)), 200
+                                    else:
+                                        # Return a message to the user telling them that they need to submit a name
+                                        response = {
+                                            'message': 'Bucketlist name should not be empty.'
+                                        }
+                                        return make_response(jsonify(response)), 400
+
+                            else:
+                                # Handle GET request, sending back the bucketlist to the user
+                                response = {
+                                    'id': bucketlist.id,
+                                    'name': bucketlist.name,
+                                    'date_created': bucketlist.date_created,
+                                    'date_modified': bucketlist.date_modified,
+                                    'created_by': bucketlist.created_by
+                                }
+                                return make_response(jsonify(response)), 200
+                        else:
+                            # user is not legit, so the payload is an error message
+                            message = user_id
+                            response = {
+                                'message': message
+                            }
+                            # return an error response, telling the user he is unauthorized
+                            return make_response(jsonify(response)), 401
 
 
-@bucketlists_blueprint.route('/bucketlists/<int:id>/items/', methods=['POST'])
+@bucketlists_blueprint.route('/bucketlists/<int:id>/items/', methods=['POST', 'GET'])
 def bucketlist_items(id):
     """
     Method that executes creation of a new bucketlist item and adding it to the given bucketlist with <id>:id
@@ -199,6 +299,31 @@ def bucketlist_items(id):
                     })
 
                     return make_response(response), 201
+            else:
+                # GET all the bucketlist items created by this user and belonging to this bucketlist
+                bucketlist_items = BucketlistItem.query.filter_by(created_by=user_id)
+
+                results = []
+
+                for bucketlist in bucketlists.items:
+                    obj = {
+                        'id': bucketlist.id,
+                        'name': bucketlist.name,
+                        'date_created': bucketlist.date_created,
+                        'date_modified': bucketlist.date_modified,
+                        'items': [{'id': item.id,
+                                   'name': item.name,
+                                   'date_created': item.date_created,
+                                   'date_modified': item.date_modified,
+                                   'done': item.done
+                                   }
+                                  for item in bucketlist.bucketlist_items
+                                  ],
+                        'created_by': bucketlist.created_by
+                    }
+                    results.append(obj)
+
+                return make_response(jsonify(results)), 200
         else:
             # user is not legit, so the payload is an error message
             message = user_id
