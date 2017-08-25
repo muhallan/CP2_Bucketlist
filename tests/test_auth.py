@@ -341,5 +341,4 @@ class AuthTestCase(unittest.TestCase):
             # drop all tables
             db.session.remove()
             db.drop_all()
-    # TODO test what happens when not all credentials are not given
-    # TODO email validation
+            db.create_all()
