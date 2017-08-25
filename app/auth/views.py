@@ -111,7 +111,8 @@ class RegistrationView(MethodView):
 
                 else:
                     # check to see if the user already exists
-                    user = User.query.filter_by(email=request.data['email']).first()
+                    user = User.query.filter_by(
+                        email=request.data['email']).first()
 
                     if not user:
                         # There is no user so we'll try to register them
@@ -228,7 +229,8 @@ class LoginView(MethodView):
             else:
                 try:
                     # Get the user object using their email because it is unique
-                    user = User.query.filter_by(email=request.data['email']).first()
+                    user = User.query.filter_by(
+                        email=request.data['email']).first()
 
                     # Try to authenticate the found user using their password
                     if user and user.password_is_valid(request.data['password']):

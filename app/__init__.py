@@ -9,6 +9,7 @@ from instance.config import app_config
 db = SQLAlchemy()
 swagger = Swagger()
 
+
 def create_app(config_name):
     """
     Method used to create an app and initialize it with the required configurations

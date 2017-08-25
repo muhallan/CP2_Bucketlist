@@ -117,7 +117,7 @@ class Bucketlist(db.Model):
     def get_all(user_id):
         """
         To get all the bucketlists for a specified user
-        :param self:
+        :param user_id:
         :return:
         """
         return Bucketlist.query.filter_by(created_by=user_id)
