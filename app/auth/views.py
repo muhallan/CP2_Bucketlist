@@ -10,11 +10,34 @@ class RegistrationView(MethodView):
     """This class registers a new user."""
 
     def post(self):
+        """ Register a new user
+        ---
+        tags:
+          - "auth"
+        parameters:
+          - in: "body"
+            name: "body"
+            description: "Email and password submitted"
+            required: true
+            schema:
+              type: "object"
+              required:
+              - "email"
+              - "password"
+              properties:
+                email:
+                  type: "string"
+                password:
+                  type: "string"
+        responses:
+            409:
+              description: " Username is already taken"
+            201:
+              description: " Success"
+            401:
+              description: " Invalid Payload"
         """
-        Handle POST request for this view. This registers a new user
-        Url is at /auth/register
-        :return:
-        """
+
         if 'email' not in request.data and 'password' not in request.data:
             # Return a message to the user telling them that they need to submit the email and password
             response = {
@@ -125,11 +148,34 @@ class LoginView(MethodView):
     """This class-based view handles user login and access token generation."""
 
     def post(self):
-        """
-        Handle POST request for this view. This view logs in a user
-        Url is /auth/login
-        :return:
-        """
+        """ Login in a registered user
+            ---
+            tags:
+              - "auth"
+            parameters:
+              - in: "body"
+                name: "body"
+                description: "Email and password submitted"
+                required: true
+                schema:
+                  type: "object"
+                  required:
+                  - "email"
+                  - "password"
+                  properties:
+                    email:
+                      type: "string"
+                    password:
+                      type: "string"
+            responses:
+                401:
+                  description: " Invalid credentials"
+                201:
+                  description: " Success"
+                400:
+                  description: " Invalid Payload"
+            """
+
         if 'email' not in request.data and 'password' not in request.data:
             # Return a message to the user telling them that they need to submit the email and password
             response = {
