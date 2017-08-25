@@ -41,7 +41,6 @@ class RegistrationView(MethodView):
 
             # check if an email and a password were both not empty
             if not email and not password:
-                print("here")
                 # Return a message to the user telling them that they need to submit the email and password
                 response = {
                     'message': 'Email address and password is empty.'
