@@ -333,21 +333,33 @@ def bucketlist_items(id):
                             else:
                                 name = str(request.data.get('name', ''))
                                 if name:
-                                    # Get the bucketlist items with the given name and from the bucketlist with the id
-                                    # specified from the URL (<int:id>)
-                                    bucketlist_item = BucketlistItem(
-                                        name=name, belongs_to=id)
-                                    bucketlist_item.save()
-                                    response = jsonify({
-                                        'id': bucketlist_item.id,
-                                        'name': bucketlist_item.name,
-                                        'date_created': bucketlist_item.date_created,
-                                        'date_modified': bucketlist_item.date_modified,
-                                        'done': bucketlist_item.done,
-                                        'belongs_to': bucketlist_item.belongs_to
-                                    })
+                                    # query whether a bucketlist item with the same name already
+                                    # exists in this bucketlist
+                                    bucketlist_items = BucketlistItem.query.filter(and_(
+                                        BucketlistItem.belongs_to == id, BucketlistItem.name == name)).first()
+                                    if bucketlist_items:
+                                        # Return a message to the user telling them that the bucketlist exists
+                                        response = {
+                                            'message': 'Bucketlist item with this name already exists in this'
+                                                       ' bucketlist. Choose another name.'
+                                        }
+                                        return make_response(jsonify(response)), 409
+                                    else:
+                                        # Save the bucketlist item with the given name in the bucketlist with the id
+                                        # specified from the URL (<int:id>)
+                                        bucketlist_item = BucketlistItem(
+                                            name=name, belongs_to=id)
+                                        bucketlist_item.save()
+                                        response = jsonify({
+                                            'id': bucketlist_item.id,
+                                            'name': bucketlist_item.name,
+                                            'date_created': bucketlist_item.date_created,
+                                            'date_modified': bucketlist_item.date_modified,
+                                            'done': bucketlist_item.done,
+                                            'belongs_to': bucketlist_item.belongs_to
+                                        })
 
-                                    return make_response(response), 201
+                                        return make_response(response), 201
                                 else:
                                     # Return a message to the user telling them that they need to submit a name
                                     response = {
