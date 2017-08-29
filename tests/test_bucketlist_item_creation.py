@@ -246,3 +246,14 @@ class BucketlistItemCreationTestCase(unittest.TestCase):
         self.assertEqual(res_again.status_code, 409)
         self.assertIn('Bucketlist item with this name already exists in this bucketlist.'
                       ' Choose another name.', str(res_again.data))
+
+    def tearDown(self):
+        """teardown all initialized variables."""
+        with self.app.app_context():
+            # drop all tables
+            db.session.remove()
+            db.drop_all()
+            db.create_all()
+
+    if __name__ == "__main__":
+        unittest.main()
