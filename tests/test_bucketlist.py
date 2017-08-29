@@ -996,8 +996,8 @@ class BucketlistTestCase(unittest.TestCase):
             '/api/v1/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
             headers=dict(Authorization="Bearer " + access_token),
             data=dict())
-        self.assertEqual(res.status_code, 400)
-        self.assertIn('Parameter name missing.', str(res.data))
+        self.assertEqual(rv.status_code, 400)
+        self.assertIn('Parameter name missing.', str(rv.data))
 
     def test_bucketlist_item_edit_with_empty_name(self):
         """
