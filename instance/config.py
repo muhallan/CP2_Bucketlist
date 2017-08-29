@@ -7,10 +7,9 @@ class Config(object):
     DEBUG = False
     CSRF_ENABLED = True
     SECRET = os.getenv('SECRET')
-    # SECRET_KEY = 'theboythatwentaway'
-    # SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    SQLALCHEMY_DATABASE_URI = "postgresql://localhost/bucketlist_api"
-
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    DEFAULT_PAGINATION_LIMIT = 20
+    MAXIMUM_PAGINATION_LIMIT = 100
 
 class DevelopmentConfig(Config):
     """Configurations for Development."""
