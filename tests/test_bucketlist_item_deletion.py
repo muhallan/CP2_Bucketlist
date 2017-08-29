@@ -194,3 +194,14 @@ class BucketlistTestCase(unittest.TestCase):
             headers=dict(Authorization=""), )
         self.assertEqual(res.status_code, 401)
         self.assertIn('Token not provided in the header with key Authorization.', str(res.data))
+
+    def tearDown(self):
+        """teardown all initialized variables."""
+        with self.app.app_context():
+            # drop all tables
+            db.session.remove()
+            db.drop_all()
+            db.create_all()
+
+    if __name__ == "__main__":
+        unittest.main()
