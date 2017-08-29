@@ -1236,6 +1236,115 @@ class BucketlistTestCase(unittest.TestCase):
             headers=dict(Authorization="Bearer " + access_token))
         self.assertEqual(result.status_code, 404)
 
+    def test_single_bucketlist_item_delete_with_no_auth_header(self):
+        """
+        Test what message is displayed when no header is provided
+        :return:
+        """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/v1/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data={'name': 'Visit the Grand Canyon!'})
+        self.assertEqual(res.status_code, 201)
+        # get the bucketlist in json
+        results = json.loads(res.data.decode())
+
+        # create a bucketlist item by making a POST request and add it to the created bucketlist
+        res = self.client().post(
+            '/api/v1/bucketlists/{}/items/'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token),
+            data={
+                "name": "Eat fried crabs"
+            })
+        self.assertEqual(res.status_code, 201)
+        # get the json containing the created bucketlist item
+        res_item = json.loads(res.data.decode())
+
+        # delete the bucketlist item we just created
+        res = self.client().delete(
+            '/api/v1/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
+            headers=dict(), )
+        self.assertEqual(res.status_code, 401)
+        self.assertIn('Header with key Authorization missing.', str(res.data))
+
+    def test_single_bucketlist_item_delete_with_invalid_token(self):
+        """
+        Test if a bucketlist is actually created using a resulting status code
+        :return:
+        """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/v1/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.bucketlist)
+
+        # assert that the bucketlist is created
+        self.assertEqual(res.status_code, 201)
+        # get the response data in json format
+        results = json.loads(res.data.decode())
+
+        # create a bucketlist item by making a POST request and add it to the created bucketlist
+        res = self.client().post(
+            '/api/v1/bucketlists/{}/items/'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token),
+            data={
+                "name": "Eat fried crabs"
+            })
+        self.assertEqual(res.status_code, 201)
+        # get the json containing the created bucketlist item
+        res_item = json.loads(res.data.decode())
+
+        # delete the bucketlist item we just created
+        res = self.client().delete(
+            '/api/v1/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
+            headers=dict(Authorization=access_token), )
+        self.assertEqual(res.status_code, 401)
+        self.assertIn('Invalid token format.', str(res.data))
+
+    def test_single_bucketlist_item_delete_with_empty_token(self):
+        """
+        Test what message is displayed when a header is provided with an empty token
+        :return:
+        """
+        self.register_user()
+        result = self.login_user()
+        access_token = json.loads(result.data.decode())['access_token']
+
+        res = self.client().post(
+            '/api/v1/bucketlists/',
+            headers=dict(Authorization="Bearer " + access_token),
+            data=self.bucketlist)
+
+        # assert that the bucketlist is created
+        self.assertEqual(res.status_code, 201)
+        # get the response data in json format
+        results = json.loads(res.data.decode())
+
+        # create a bucketlist item by making a POST request and add it to the created bucketlist
+        res = self.client().post(
+            '/api/v1/bucketlists/{}/items/'.format(results['id']),
+            headers=dict(Authorization="Bearer " + access_token),
+            data={
+                "name": "Eat fried crabs"
+            })
+        self.assertEqual(res.status_code, 201)
+        # get the json containing the created bucketlist item
+        res_item = json.loads(res.data.decode())
+
+        # delete the bucketlist item we just created
+        res = self.client().delete(
+            '/api/v1/bucketlists/{}/items/{}'.format(results['id'], res_item['id']),
+            headers=dict(Authorization=""), )
+        self.assertEqual(res.status_code, 401)
+        self.assertIn('Token not provided in the header with key Authorization.', str(res.data))
+
     def tearDown(self):
         """teardown all initialized variables."""
         with self.app.app_context():
