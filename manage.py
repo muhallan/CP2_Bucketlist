@@ -5,7 +5,6 @@ import coverage
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from app import db, create_app
-from app import models
 
 # initialize the app with all its configurations
 app = create_app(config_name=os.getenv('APP_SETTINGS'))
@@ -18,6 +17,7 @@ manager = Manager(app)
 # Usage: python manage.py db init
 manager.add_command('db', MigrateCommand)
 
+
 # define our command for testing called "test"
 # Usage: python manage.py test
 @manager.command
@@ -28,6 +28,7 @@ def test():
     if result.wasSuccessful():
         return 0
     return 1
+
 
 @manager.command
 def cov():
@@ -46,10 +47,12 @@ def cov():
     print('HTML version: file://%s/index.html' % covdir)
     cov.erase()
 
+
 @manager.command
 def create_db():
     """Creates the db tables."""
     db.create_all()
+
 
 @manager.command
 def drop_db():
