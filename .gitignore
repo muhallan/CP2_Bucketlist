@@ -5,3 +5,5 @@ htmlcov/
 .coverage
 __pycache__/
 tmp
+migrations
+venv
