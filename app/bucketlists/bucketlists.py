@@ -1,7 +1,8 @@
 from . import bucketlists_blueprint
 from sqlalchemy import and_
-from flask import request, jsonify, abort, make_response
+from flask import request, jsonify, abort, make_response, url_for
 from app.models import Bucketlist, User, BucketlistItem
+from instance.config import Config
 
 
 # for query parameter for pagination and searching
@@ -89,19 +90,28 @@ def bucketlists():
                         else:
                             # get the query string for limit if it exists and for pagination
                             # if the query parameter for limit doesn't exist, 20 is used by default
-                            limit = request.args.get('limit', 'default 20')
+                            limit = request.args.get('limit', 'default ' + str(Config.DEFAULT_PAGINATION_LIMIT))
                             try:
                                 limit = int(limit)
                             except ValueError:
                                 # if limit value is gibberish, default to 20
-                                limit = 20
+                                limit = Config.DEFAULT_PAGINATION_LIMIT
 
                             # if limit supplied is greater than 100, display only 100
-                            if limit > 100:
-                                limit = 100
+                            if limit > Config.MAXIMUM_PAGINATION_LIMIT:
+                                limit = Config.MAXIMUM_PAGINATION_LIMIT
 
                             # set the default page to display to 1
-                            page = 1
+                            page = request.args.get('page', 'default 1')
+
+                            try:
+                                page = int(page)
+                            except ValueError:
+                                # if page value is gibberish, default to 1
+                                page = 1
+
+                            if limit < 1 or page < 1:
+                                return abort(404, 'Page or Limit must be greater than 1')
 
                             # get the query string for q - this is searching based on name
                             search_string = request.args.get('q')
@@ -117,6 +127,16 @@ def bucketlists():
                                     created_by=user_id).paginate(page, limit)
 
                             results = []
+
+                            if page == 1:
+                                prev_page = url_for('.bucketlists') + '?limit={}'.format(limit)
+                            else:
+                                prev_page = url_for('.bucketlists') + '?limit={}&page={}'.format(limit, page - 1)
+
+                            if page < bucketlists.pages:
+                                next_page = url_for('.bucketlists') + '?limit={}&page={}'.format(limit, page + 1)
+                            else:
+                                next_page = None
 
                             for bucketlist in bucketlists.items:
                                 obj = {
@@ -136,7 +156,13 @@ def bucketlists():
                                 }
                                 results.append(obj)
 
-                            return make_response(jsonify(results)), 200
+                            return make_response(jsonify({'page': page,
+                                                          'items_per_page': limit,
+                                                          'total_items': bucketlists.total,
+                                                          'total_pages': bucketlists.pages,
+                                                          'prev_page': prev_page,
+                                                          'next_page': next_page,
+                                                          'items': results})), 200
                     else:
                         # user is not legit, so the payload is an error message
                         message = user_id
