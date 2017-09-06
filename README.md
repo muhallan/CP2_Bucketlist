@@ -8,10 +8,17 @@ CP2_Bucketlist is a Python Flask built REST API which is lets one create, record
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. A linux machine is assumed.
 
 ### Pre-requisites
-* Python versions 2.7, 3.3 to 3.7
+* [Python](https://docs.python.org/3/) versions 2.7, 3.3 to 3.7
+* [Git](https://git-scm.com/)
+* [pip](https://pypi.python.org/pypi/pip)
+* [PostgreSQL](https://www.postgresql.org/docs/current/static/tutorial.html)
+* [virtualenv](https://virtualenv.pypa.io/en/stable/)
+
+Ensure you have installed PostgreSQL in your computer and it's server is running locally on port 5432
+
 
 ### API Features
 * Register and Sign up to the API
@@ -35,19 +42,36 @@ Create the virtualenv
 
 ```
 $ pip install virtualenv
-$ mkvirtualenv CP2_Bucketlist
+$ virtualenv venv
 ```
 
-Install dependencies
+Export environment variables. This as well starts the virtual environment venv
+
+```
+$ source .env
+```
+Install dependencies in the virtual environment
 
 ```
 $ pip install -r requirements.txt
 ```
 
+Create Postgres databases for use in testing and development
+
+```
+$ createdb test_db
+$ createdb bucketlist_api_dev
+```
+Set up the databases by running migrations
+```
+$ python manage.py db init
+$ python manage.py db migrate
+$ python manage.py db upgrade
+```
 Run the API
 
 ```
-$ python run.py
+$ python manage.py runserver
 ```
 
 To access the API on the server, and interface with it, fire up Postman and run this url
